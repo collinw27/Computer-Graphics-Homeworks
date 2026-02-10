@@ -143,6 +143,45 @@ public:
     }
 };
 
+class Plane : public Shape3D
+{
+    Vec3 origin;
+    Vec3 normal;
+
+public:
+
+    Plane(Vec3 origin, Vec3 normal, Color color, float N = 10.0)
+    {
+        this->origin = origin;
+        this->normal = normal;
+        this->color = color;
+        this->specularN = N;
+    }
+
+    virtual float checkIntersection(Vec3 S, Vec3 D) override
+    {
+        // Using implicit plane equation and explicit ray equation:
+        // (origin + tD - S) . normal = 0
+        // Simplifying: t = (origin - S) . N / (D . N)
+
+        // Don't show if viewed from behind
+
+        if (D.dot(normal) > 0)
+            return -1;
+
+        float denominator = D.dot(normal);
+        if (denominator == 0.0)
+            return -1;
+        else
+            return (origin - S).dot(normal) / denominator;
+    }
+
+    virtual Vec3 getNormal(Vec3) override
+    {
+        return normal;
+    }
+};
+
 struct Light
 {
     Vec3 position;
@@ -174,7 +213,7 @@ class RayTracer
 
     // Scene objects
 
-    std::vector<Sphere*> spheres;
+    std::vector<Shape3D*> shapes;
     std::vector<Light*> lights;
 
     // Misc constants
@@ -202,13 +241,14 @@ RayTracer::RayTracer()
     doPerspective = true;
 
     kD = 0.3;
-    kS = 0.2;
+    kS = 0.1;
 
     // Create scene objects
 
-    spheres.push_back(new Sphere{Vec3(0.0, -2.0, -7.0), 1.0, Color{100, 255, 100}});
-    spheres.push_back(new Sphere{Vec3(0.0, -2.0, -5.0), 1.0, Color{100, 100, 255}});
-    spheres.push_back(new Sphere{Vec3(0.0, -2.0, -3.0), 1.0, Color{255, 100, 100}});
+    shapes.push_back(new Sphere(Vec3(0.0, -2.0, -7.0), 1.0, Color{100, 255, 100}));
+    shapes.push_back(new Sphere(Vec3(0.0, -2.0, -5.0), 1.0, Color{100, 100, 255}));
+    shapes.push_back(new Sphere(Vec3(0.0, -2.0, -3.0), 1.0, Color{255, 100, 100}));
+    shapes.push_back(new Plane(Vec3(0.0, -3.0, 0.0), Vec3(0.0, 1.0, 0.0), Color{80, 80, 120}));
     lights.push_back(new Light{Vec3(-5.0, 5.0, -5.0), 5.0, 0.2});
     // lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 2.0, 0.2});
 }
@@ -242,9 +282,9 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
             // Determine color using sphere intersection
             // Takes color from closest sphere
 
-            Sphere* closest = nullptr;
+            Shape3D* closest = nullptr;
             float smallestDist = 9999.0;
-            for (Sphere* sphere : spheres)
+            for (Shape3D* shape : shapes)
             {
                 // From ray tracing Wikipedia (and class lecture):
                 // t^2 + (2V . D)t + (V^2 - r^2) = 0, where
@@ -252,11 +292,11 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
                 // Ray: R(t) = S + Dt
                 // As a shorthand, V = S - C
 
-                float t = sphere->checkIntersection(S, D);
+                float t = shape->checkIntersection(S, D);
                 if (t >= 0 && t < smallestDist)
                 {
                     smallestDist = t;
-                    closest = sphere;
+                    closest = shape;
                 }
             }
 
@@ -284,7 +324,8 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
                     // Specular light
 
                     Vec3 vH = (vL + (viewpoint - intersectPos).normalized()).normalized();
-                    specIntensity += kS * light->intensity * std::pow(std::max(0.f, normal.dot(vH)), closest->specularN);
+                    specIntensity = kS * light->intensity * std::pow(std::max(0.f, normal.dot(vH)), closest->specularN);
+                    intensity += specIntensity;
                 }
 
                 // Normal intensity adds object color
