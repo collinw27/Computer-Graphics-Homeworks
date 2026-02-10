@@ -89,18 +89,27 @@ public:
     }
 };
 
+class Material
+{
+public:
+
+    Color color;
+    float kD = 0.3; // Diffuse coefficient
+    float kS = 0.1; // Specular coefficient
+    float N = 10.0;
+
+    Material(Color color) : color{color} {}
+};
+
 class Shape3D
 {
 public:
 
-    Shape3D() {}
+    Material material;
+
+    Shape3D(Material material) : material{material} {}
     virtual Vec3 getNormal(Vec3 intersectPos) = 0;
     virtual float checkIntersection(Vec3 S, Vec3 D) = 0;
-
-    // Material properties
-
-    Color color;
-    float specularN = 10.0;
 };
 
 class Sphere : public Shape3D
@@ -110,12 +119,10 @@ class Sphere : public Shape3D
 
 public:
 
-    Sphere(Vec3 center, float radius, Color color, float N = 10.0)
+    Sphere(Vec3 center, float radius, Material material) : Shape3D{material}
     {
         this->center = center;
         this->radius = radius;
-        this->color = color;
-        this->specularN = N;
     }
 
     // Returns a positive t if intersected, otherwise negative
@@ -150,12 +157,10 @@ class Plane : public Shape3D
 
 public:
 
-    Plane(Vec3 origin, Vec3 normal, Color color, float N = 10.0)
+    Plane(Vec3 origin, Vec3 normal, Material material) : Shape3D{material}
     {
         this->origin = origin;
         this->normal = normal;
-        this->color = color;
-        this->specularN = N;
     }
 
     virtual float checkIntersection(Vec3 S, Vec3 D) override
@@ -218,9 +223,6 @@ class RayTracer
 
     // Misc constants
 
-    float kD; // Diffuse coefficient
-    float kS; // Specular coefficient
-
 public:
 
     RayTracer();
@@ -240,17 +242,21 @@ RayTracer::RayTracer()
     projDist = 5.0; 
     doPerspective = true;
 
-    kD = 0.3;
-    kS = 0.1;
-
     // Create scene objects
 
-    shapes.push_back(new Sphere(Vec3(0.0, -2.0, -7.0), 1.0, Color{100, 255, 100}));
-    shapes.push_back(new Sphere(Vec3(0.0, -2.0, -5.0), 1.0, Color{100, 100, 255}));
     shapes.push_back(new Sphere(Vec3(0.0, -2.0, -3.0), 1.0, Color{255, 100, 100}));
-    shapes.push_back(new Plane(Vec3(0.0, -3.0, 0.0), Vec3(0.0, 1.0, 0.0), Color{80, 80, 120}));
-    lights.push_back(new Light{Vec3(-5.0, 5.0, -5.0), 5.0, 0.2});
-    // lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 2.0, 0.2});
+    shapes.push_back(new Sphere(Vec3(-3.0, -1.4, -3.0), 1.6, Color{100, 255, 100}));
+    lights.push_back(new Light{Vec3(-5.0, 2.0, -3.0), 3.0, 0.2});
+    // lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 0.2, 0.1});
+
+    Material blueMat{Color{100, 100, 255}};
+    blueMat.kS = 0.3;
+    blueMat.N = 30;
+    shapes.push_back(new Sphere(Vec3(0.0, -2.0, -5.0), 1.0, blueMat));
+    
+    Material planeMat{Color{80, 80, 80}};
+    planeMat.kS = 0.0;
+    shapes.push_back(new Plane(Vec3(0.0, -3.0, 0.0), Vec3(0.0, 1.0, 0.0), planeMat));
 }
 
 void RayTracer::createImage(unsigned char* image, int width, int height)
@@ -270,8 +276,7 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
         {
             // Calculate center and direction of ray
             // Changes depending on perspective/orthographic
-            // D must be a unit vector due to how the quadratic
-            // calculations have been simplified
+            // D must be a unit vector due to how the quadratic has been simplified
 
             float u_scalar = ((float)x / width - 0.5) * viewW;
             float v_scalar = ((float)y / height - 0.5) * viewH;
@@ -305,6 +310,7 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
             Color col = Color{100, 100, 100};
             if (closest != nullptr)
             {
+                Material& material = closest->material;
                 float intensity = 0.0;
                 float specIntensity = 0.0;
 
@@ -315,25 +321,44 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
                 Vec3 normal = closest->getNormal(intersectPos);
                 for (Light* light : lights)
                 {
-                    // Find light vector for each light
+                    // Shadow
+                    // Find distance from light to current object
+                    // Any object with smaller distance will block it (0.01 used for bias)
 
+                    bool isShadow = false;
                     Vec3 vL = (light->position - intersectPos).normalized();
-                    intensity += kD * light->intensity * std::max(0.f, normal.dot(vL));
+                    float shadowDist = closest->checkIntersection(light->position, -vL) - 0.01;
+                    for (Shape3D* shadowShape : shapes)
+                    {
+                        float t = shadowShape->checkIntersection(light->position, -vL);
+                        if (t >= 0 && t < shadowDist)
+                        {
+                            isShadow = true;
+                            break;
+                        }
+                    }
+
+                    // Ambient included regardless of shadow
+                    
                     intensity += light->ambient;
+                    if (!isShadow)
+                    {
+                        // Diffuse & specular
 
-                    // Specular light
-
-                    Vec3 vH = (vL + (viewpoint - intersectPos).normalized()).normalized();
-                    specIntensity = kS * light->intensity * std::pow(std::max(0.f, normal.dot(vH)), closest->specularN);
-                    intensity += specIntensity;
+                        intensity += material.kD * light->intensity * std::max(0.f, normal.dot(vL));
+                        Vec3 vH = (vL + (viewpoint - intersectPos).normalized()).normalized();
+                        specIntensity += material.kS * light->intensity * std::pow(std::max(0.f, normal.dot(vH)), material.N);
+                        intensity += specIntensity;
+                    }
                 }
 
                 // Normal intensity adds object color
-                // Speculat intensity adds white light
-
+                // Specular intensity adds white light
+                // Shadow takes priority
+                
                 intensity = std::min(1.f, intensity);
                 specIntensity = std::min(1.f, specIntensity);
-                Vec3 colVec = Vec3::fromColor(closest->color) * intensity;
+                Vec3 colVec = Vec3::fromColor(material.color) * intensity;
                 colVec = colVec + Vec3(255, 255, 255) * specIntensity;
                 col = colVec.toColor();
             }
