@@ -63,9 +63,26 @@ public:
         return Vec3(x / l, y / l, z / l);
     }
 
+    // Rotates the x and z, ignoring the vertical component
+
+    Vec3 rotateXZ(float angle)
+    {
+        return Vec3(x * std::cos(angle) - z * std::sin(angle), y, x * std::sin(angle) + z * std::cos(angle));
+    }
+
     std::string str()
     {
         return "(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ")";
+    }
+
+    Color toColor()
+    {
+        return Color{static_cast<unsigned char>(x), static_cast<unsigned char>(y), static_cast<unsigned char>(z)};
+    }
+
+    static Vec3 fromColor(const Color& color)
+    {
+        return Vec3(color.r, color.g, color.b);
     }
 };
 
@@ -87,7 +104,7 @@ struct Light
 struct UpdateInfo
 {
     float deltaTime;
-    bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT;
+    bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT, keyE, keyR;
 };
 
 // Handles the program logic of the ray tracer
@@ -108,6 +125,10 @@ class RayTracer
 
     std::vector<Sphere*> spheres;
     std::vector<Light*> lights;
+
+    // Misc constants
+
+    float kD = 0.3; // Diffuse constant
 
 public:
 
@@ -205,12 +226,30 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
                 }
             }
 
-            // Use color of closest sphere (if applicable)
+            // Work out pixel color if closest sphere was found
             
             Color col = Color{100, 100, 100};
             if (closest != nullptr)
             {
-                col = closest->color;
+                float intensity = 0.0;
+
+                // Calculate diffuse light
+                // Start by finding normal vector of intersection point
+
+                Vec3 intersectPos = S + D * smallestDist;
+                Vec3 normal = (intersectPos - closest->center).normalized();
+                for (Light* light : lights)
+                {
+                    // Find light vector for each light
+
+                    Vec3 vL = (light->position - intersectPos).normalized();
+                    intensity += kD * light->intensity * std::max(0.f, normal.dot(vL));
+                }
+
+                // No intensity = black, Full intensity = color
+
+                intensity = std::min(1.f, intensity);
+                col = (Vec3::fromColor(closest->color) * intensity).toColor();
             }
 
             // Set array to color
@@ -225,17 +264,34 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
 
 void RayTracer::update(const UpdateInfo& info)
 {
+    // Translate camera
+    // WASD depends on camera rotation
+
     constexpr float SPEED = 3.0;
-    if (info.keyW)
-        viewpoint = viewpoint + Vec3(0.0, 0.0, -SPEED * info.deltaTime);
-    if (info.keyA)
-        viewpoint = viewpoint + Vec3(-SPEED * info.deltaTime, 0, 0);
-    if (info.keyS)
-        viewpoint = viewpoint + Vec3(0.0, 0.0, SPEED * info.deltaTime);
-    if (info.keyD)
-        viewpoint = viewpoint + Vec3(SPEED * info.deltaTime, 0, 0);
     if (info.keySPACE)
         viewpoint = viewpoint + Vec3(0.0, SPEED * info.deltaTime, 0);
     if (info.keySHIFT)
         viewpoint = viewpoint + Vec3(0.0, -SPEED * info.deltaTime, 0);
+    Vec3 translate {};
+    if (info.keyW)
+        translate = translate + Vec3(0.0, 0.0, -1.0);
+    if (info.keyA)
+        translate = translate + Vec3(-1.0, 0.0, 0.0);
+    if (info.keyS)
+        translate = translate + Vec3(0.0, 0.0, 1.0);
+    if (info.keyD)
+        translate = translate + Vec3(1.0, 0.0, 0.0);
+    translate = translate.rotateXZ(std::atan2(lookAt.x, -lookAt.z));
+    viewpoint = viewpoint + translate * SPEED * info.deltaTime;
+
+    // Rotate camera
+
+    constexpr float RSPEED = 2.0;
+    if (info.keyE || info.keyR)
+    {
+        float angle = std::atan2(lookAt.z, lookAt.x);
+        angle += (info.keyE ? -RSPEED : RSPEED) * info.deltaTime;
+        lookAt.x = std::cos(angle);
+        lookAt.z = std::sin(angle);
+    }
 }

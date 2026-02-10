@@ -178,8 +178,9 @@ int main()
     float lastTime = currentTime;
 
     // start tracking keys
-    int keys[6] = {GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D, GLFW_KEY_SPACE, GLFW_KEY_LEFT_SHIFT};
-    bool keyStates[6] = {false, false, false, false, false, false};
+    int keys[8] = {GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D,
+        GLFW_KEY_SPACE, GLFW_KEY_LEFT_SHIFT, GLFW_KEY_E, GLFW_KEY_R};
+    bool keyStates[8] = {false, false, false, false, false, false, false, false};
 
     // render loop
     // -----------
@@ -191,7 +192,7 @@ int main()
 
         // process updates
         currentTime = glfwGetTime();
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 8; i++)
         {
             int keyState = glfwGetKey(window, keys[i]);
             keyStates[i] = keyStates[i] || (keyState == GLFW_PRESS);
@@ -199,12 +200,8 @@ int main()
         }
         UpdateInfo updateInfo {
             currentTime - lastTime,
-            keyStates[0],
-            keyStates[1],
-            keyStates[2],
-            keyStates[3],
-            keyStates[4],
-            keyStates[5]
+            keyStates[0], keyStates[1], keyStates[2], keyStates[3],
+            keyStates[4], keyStates[5], keyStates[6], keyStates[7]
         };
         lastTime = currentTime;
         rayTracer.update(updateInfo);
