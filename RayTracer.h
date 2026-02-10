@@ -77,7 +77,10 @@ public:
 
     Color toColor()
     {
-        return Color{static_cast<unsigned char>(x), static_cast<unsigned char>(y), static_cast<unsigned char>(z)};
+        return Color{(unsigned char)std::min(255, (int)(x)),
+            (unsigned char)std::min(255, (int)(y)),
+            (unsigned char)std::min(255, (int)(z))
+        };
     }
 
     static Vec3 fromColor(const Color& color)
@@ -91,12 +94,14 @@ struct Sphere
     Vec3 center;
     float radius;
     Color color;
+    float specularN = 20.0;
 };
 
 struct Light
 {
     Vec3 position;
     float intensity;
+    float ambient;
 };
 
 // Used for neatly passing information into the update function
@@ -128,7 +133,8 @@ class RayTracer
 
     // Misc constants
 
-    float kD = 0.3; // Diffuse constant
+    float kD = 0.3; // Diffuse coefficient
+    float kS = 0.2; // Specular coefficient
 
 public:
 
@@ -154,7 +160,8 @@ RayTracer::RayTracer()
     spheres.push_back(new Sphere{Vec3(0.0, -2.0, -7.0), 1.0, Color{100, 255, 100}});
     spheres.push_back(new Sphere{Vec3(0.0, -2.0, -5.0), 1.0, Color{100, 100, 255}});
     spheres.push_back(new Sphere{Vec3(0.0, -2.0, -3.0), 1.0, Color{255, 100, 100}});
-    lights.push_back(new Light{Vec3(-5.0, 5.0, -5.0), 5.0});
+    lights.push_back(new Light{Vec3(-5.0, 5.0, -5.0), 5.0, 0.2});
+    lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 2.0, 0.2});
 }
 
 void RayTracer::createImage(unsigned char* image, int width, int height)
@@ -232,6 +239,7 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
             if (closest != nullptr)
             {
                 float intensity = 0.0;
+                float specIntensity = 0.0;
 
                 // Calculate diffuse light
                 // Start by finding normal vector of intersection point
@@ -244,12 +252,22 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
 
                     Vec3 vL = (light->position - intersectPos).normalized();
                     intensity += kD * light->intensity * std::max(0.f, normal.dot(vL));
+                    intensity += light->ambient;
+
+                    // Specular light
+
+                    Vec3 vH = (vL + (viewpoint - intersectPos).normalized()).normalized();
+                    specIntensity += kS * light->intensity * std::pow(std::max(0.f, normal.dot(vH)), closest->specularN);
                 }
 
-                // No intensity = black, Full intensity = color
+                // Normal intensity adds object color
+                // Speculat intensity adds white light
 
                 intensity = std::min(1.f, intensity);
-                col = (Vec3::fromColor(closest->color) * intensity).toColor();
+                specIntensity = std::min(1.f, specIntensity);
+                Vec3 colVec = Vec3::fromColor(closest->color) * intensity;
+                colVec = colVec + Vec3(255, 255, 255) * specIntensity;
+                col = colVec.toColor();
             }
 
             // Set array to color
