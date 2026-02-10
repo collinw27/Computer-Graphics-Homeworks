@@ -181,6 +181,7 @@ int main()
     int keys[8] = {GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D,
         GLFW_KEY_SPACE, GLFW_KEY_LEFT_SHIFT, GLFW_KEY_E, GLFW_KEY_R};
     bool keyStates[8] = {false, false, false, false, false, false, false, false};
+    bool holdingP = false;
 
     // render loop
     // -----------
@@ -201,8 +202,10 @@ int main()
         UpdateInfo updateInfo {
             currentTime - lastTime,
             keyStates[0], keyStates[1], keyStates[2], keyStates[3],
-            keyStates[4], keyStates[5], keyStates[6], keyStates[7]
+            keyStates[4], keyStates[5], keyStates[6], keyStates[7],
+            !holdingP && glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS
         };
+        holdingP = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
         lastTime = currentTime;
         rayTracer.update(updateInfo);
 

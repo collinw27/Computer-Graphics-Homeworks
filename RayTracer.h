@@ -89,12 +89,58 @@ public:
     }
 };
 
-struct Sphere
+class Shape3D
+{
+public:
+
+    Shape3D() {}
+    virtual Vec3 getNormal(Vec3 intersectPos) = 0;
+    virtual float checkIntersection(Vec3 S, Vec3 D) = 0;
+
+    // Material properties
+
+    Color color;
+    float specularN = 10.0;
+};
+
+class Sphere : public Shape3D
 {
     Vec3 center;
     float radius;
-    Color color;
-    float specularN = 20.0;
+
+public:
+
+    Sphere(Vec3 center, float radius, Color color, float N = 10.0)
+    {
+        this->center = center;
+        this->radius = radius;
+        this->color = color;
+        this->specularN = N;
+    }
+
+    // Returns a positive t if intersected, otherwise negative
+
+    virtual float checkIntersection(Vec3 S, Vec3 D) override
+    {
+        Vec3 V (S - center);
+        float quadB = 2 * V.dot(D);
+        float quadC = V.dot(V) - (radius * radius);
+
+        // Check discriminant to test for intersection
+        // Only smallest t is checked (invisible from inside)
+        // t = (-b - disc)/2a (a = 1)
+
+        float disc = quadB * quadB - 4 * quadC;
+        if (disc >= 0)
+            return 0.5 * (-quadB - std::sqrt(disc));
+        else
+            return -1.0;
+    }
+
+    virtual Vec3 getNormal(Vec3 intersectPos) override
+    {
+        return (intersectPos - center).normalized();
+    }
 };
 
 struct Light
@@ -109,7 +155,7 @@ struct Light
 struct UpdateInfo
 {
     float deltaTime;
-    bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT, keyE, keyR;
+    bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT, keyE, keyR, keyP;
 };
 
 // Handles the program logic of the ray tracer
@@ -133,8 +179,8 @@ class RayTracer
 
     // Misc constants
 
-    float kD = 0.3; // Diffuse coefficient
-    float kS = 0.2; // Specular coefficient
+    float kD; // Diffuse coefficient
+    float kS; // Specular coefficient
 
 public:
 
@@ -155,13 +201,16 @@ RayTracer::RayTracer()
     projDist = 5.0; 
     doPerspective = true;
 
+    kD = 0.3;
+    kS = 0.2;
+
     // Create scene objects
 
     spheres.push_back(new Sphere{Vec3(0.0, -2.0, -7.0), 1.0, Color{100, 255, 100}});
     spheres.push_back(new Sphere{Vec3(0.0, -2.0, -5.0), 1.0, Color{100, 100, 255}});
     spheres.push_back(new Sphere{Vec3(0.0, -2.0, -3.0), 1.0, Color{255, 100, 100}});
     lights.push_back(new Light{Vec3(-5.0, 5.0, -5.0), 5.0, 0.2});
-    lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 2.0, 0.2});
+    // lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 2.0, 0.2});
 }
 
 void RayTracer::createImage(unsigned char* image, int width, int height)
@@ -203,33 +252,11 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
                 // Ray: R(t) = S + Dt
                 // As a shorthand, V = S - C
 
-                Vec3 V (S - sphere->center);
-                float quadB = 2 * V.dot(D);
-                float quadC = V.dot(V) - (sphere->radius * sphere->radius);
-
-                // Check discriminant to test for intersection
-
-                float disc = quadB * quadB - 4 * quadC;
-                if (disc >= 0)
+                float t = sphere->checkIntersection(S, D);
+                if (t >= 0 && t < smallestDist)
                 {
-                    // (-b +- disc)/2a (a = 1)
-                    // Check both +- for being closest
-
-                    float t = 0.5 * (-quadB - std::sqrt(disc));
-                    if (t >= 0 && t < smallestDist)
-                    {
-                        smallestDist = t;
-                        closest = sphere;
-                    }
-                    else
-                    {
-                        t = 0.5 * (-quadB + std::sqrt(disc));
-                        if (t >= 0 && t < smallestDist)
-                        {
-                            smallestDist = t;
-                            closest = sphere;
-                        }
-                    }
+                    smallestDist = t;
+                    closest = sphere;
                 }
             }
 
@@ -245,7 +272,7 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
                 // Start by finding normal vector of intersection point
 
                 Vec3 intersectPos = S + D * smallestDist;
-                Vec3 normal = (intersectPos - closest->center).normalized();
+                Vec3 normal = closest->getNormal(intersectPos);
                 for (Light* light : lights)
                 {
                     // Find light vector for each light
@@ -311,5 +338,12 @@ void RayTracer::update(const UpdateInfo& info)
         angle += (info.keyE ? -RSPEED : RSPEED) * info.deltaTime;
         lookAt.x = std::cos(angle);
         lookAt.z = std::sin(angle);
+    }
+
+    // Toggle perspective
+
+    if (info.keyP)
+    {
+        doPerspective = !doPerspective;
     }
 }
