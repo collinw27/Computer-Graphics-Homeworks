@@ -97,6 +97,7 @@ public:
     float kD = 0.3; // Diffuse coefficient
     float kS = 0.1; // Specular coefficient
     float N = 10.0;
+    float glaze = -1.0; // Set to value in [0, 1] to mix color with reflected light
 
     Material(Color color) : color{color} {}
 };
@@ -223,6 +224,8 @@ class RayTracer
 
     // Misc constants
 
+    Color getRayColor(Vec3 S, Vec3 D, int recursionLevel);
+
 public:
 
     RayTracer();
@@ -247,7 +250,7 @@ RayTracer::RayTracer()
     shapes.push_back(new Sphere(Vec3(0.0, -2.0, -3.0), 1.0, Color{255, 100, 100}));
     shapes.push_back(new Sphere(Vec3(-3.0, -1.4, -3.0), 1.6, Color{100, 255, 100}));
     lights.push_back(new Light{Vec3(-5.0, 2.0, -3.0), 3.0, 0.2});
-    // lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 0.2, 0.1});
+    lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 0.4, 0.1});
 
     Material blueMat{Color{100, 100, 255}};
     blueMat.kS = 0.3;
@@ -256,6 +259,7 @@ RayTracer::RayTracer()
     
     Material planeMat{Color{80, 80, 80}};
     planeMat.kS = 0.0;
+    planeMat.glaze = 0.2;
     shapes.push_back(new Plane(Vec3(0.0, -3.0, 0.0), Vec3(0.0, 1.0, 0.0), planeMat));
 }
 
@@ -284,84 +288,10 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
             Vec3 D = doPerspective ? (-w * projDist + u * u_scalar + v * v_scalar) : -w;
             D = D.normalized();
 
-            // Determine color using sphere intersection
-            // Takes color from closest sphere
+            // Get color of ray
+            // This is delegated to another method to allow for recursive sampling
 
-            Shape3D* closest = nullptr;
-            float smallestDist = 9999.0;
-            for (Shape3D* shape : shapes)
-            {
-                // From ray tracing Wikipedia (and class lecture):
-                // t^2 + (2V . D)t + (V^2 - r^2) = 0, where
-                // Sphere: |X - C|^2 = r^2
-                // Ray: R(t) = S + Dt
-                // As a shorthand, V = S - C
-
-                float t = shape->checkIntersection(S, D);
-                if (t >= 0 && t < smallestDist)
-                {
-                    smallestDist = t;
-                    closest = shape;
-                }
-            }
-
-            // Work out pixel color if closest sphere was found
-            
-            Color col = Color{100, 100, 100};
-            if (closest != nullptr)
-            {
-                Material& material = closest->material;
-                float intensity = 0.0;
-                float specIntensity = 0.0;
-
-                // Calculate diffuse light
-                // Start by finding normal vector of intersection point
-
-                Vec3 intersectPos = S + D * smallestDist;
-                Vec3 normal = closest->getNormal(intersectPos);
-                for (Light* light : lights)
-                {
-                    // Shadow
-                    // Find distance from light to current object
-                    // Any object with smaller distance will block it (0.01 used for bias)
-
-                    bool isShadow = false;
-                    Vec3 vL = (light->position - intersectPos).normalized();
-                    float shadowDist = closest->checkIntersection(light->position, -vL) - 0.01;
-                    for (Shape3D* shadowShape : shapes)
-                    {
-                        float t = shadowShape->checkIntersection(light->position, -vL);
-                        if (t >= 0 && t < shadowDist)
-                        {
-                            isShadow = true;
-                            break;
-                        }
-                    }
-
-                    // Ambient included regardless of shadow
-                    
-                    intensity += light->ambient;
-                    if (!isShadow)
-                    {
-                        // Diffuse & specular
-
-                        intensity += material.kD * light->intensity * std::max(0.f, normal.dot(vL));
-                        Vec3 vH = (vL + (viewpoint - intersectPos).normalized()).normalized();
-                        specIntensity += material.kS * light->intensity * std::pow(std::max(0.f, normal.dot(vH)), material.N);
-                        intensity += specIntensity;
-                    }
-                }
-
-                // Normal intensity adds object color
-                // Specular intensity adds white light
-                // Shadow takes priority
-                
-                intensity = std::min(1.f, intensity);
-                specIntensity = std::min(1.f, specIntensity);
-                Vec3 colVec = Vec3::fromColor(material.color) * intensity;
-                colVec = colVec + Vec3(255, 255, 255) * specIntensity;
-                col = colVec.toColor();
-            }
+            Color col = getRayColor(S, D, 0);
 
             // Set array to color
 
@@ -373,12 +303,105 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
     }
 }
 
+Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
+{
+    // Determine color using sphere intersection
+    // Takes color from closest sphere
+
+    Shape3D* closest = nullptr;
+    float smallestDist = 9999.0;
+    for (Shape3D* shape : shapes)
+    {
+        // From ray tracing Wikipedia (and class lecture):
+        // t^2 + (2V . D)t + (V^2 - r^2) = 0, where
+        // Sphere: |X - C|^2 = r^2
+        // Ray: R(t) = S + Dt
+        // As a shorthand, V = S - C
+
+        float t = shape->checkIntersection(S, D);
+        if (t >= 0 && t < smallestDist)
+        {
+            smallestDist = t;
+            closest = shape;
+        }
+    }
+
+    // Work out pixel color if closest sphere was found
+    
+    Color col = Color{100, 100, 100};
+    if (closest != nullptr)
+    {
+        Material& material = closest->material;
+        float intensity = 0.0;
+        float specIntensity = 0.0;
+
+        // Calculate diffuse light
+        // Start by finding normal vector of intersection point
+
+        Vec3 intersectPos = S + D * smallestDist;
+        Vec3 vE = (viewpoint - intersectPos).normalized();
+        Vec3 normal = closest->getNormal(intersectPos);
+        for (Light* light : lights)
+        {
+            // Shadow
+            // Find distance from light to current object
+            // Any object with smaller distance will block it (0.01 used for bias)
+
+            bool isShadow = false;
+            Vec3 vL = (light->position - intersectPos).normalized();
+            float shadowDist = closest->checkIntersection(light->position, -vL) - 0.01;
+            for (Shape3D* shadowShape : shapes)
+            {
+                float t = shadowShape->checkIntersection(light->position, -vL);
+                if (t >= 0 && t < shadowDist)
+                {
+                    isShadow = true;
+                    break;
+                }
+            }
+
+            // Ambient included regardless of shadow
+            
+            intensity += light->ambient;
+            if (!isShadow)
+            {
+                // Diffuse & specular
+
+                intensity += material.kD * light->intensity * std::max(0.f, normal.dot(vL));
+                Vec3 vH = (vL + vE).normalized();
+                specIntensity += material.kS * light->intensity * std::pow(std::max(0.f, normal.dot(vH)), material.N);
+                intensity += specIntensity;
+            }
+        }
+
+        // Normal intensity adds object color
+        // Specular intensity adds white light
+        // Shadow takes priority
+        
+        intensity = std::min(1.f, intensity);
+        specIntensity = std::min(1.f, specIntensity);
+        Vec3 colVec = Vec3::fromColor(material.color) * intensity;
+        colVec = colVec + Vec3(255, 255, 255) * specIntensity;
+        col = colVec.toColor();
+
+        // Glazed surface: shoot a second ray, and mix with final color
+
+        if (material.glaze > 0.0 && recursionLevel < 1)
+        {
+            Vec3 vR = normal * normal.dot(vE) * 2.0 - vE;
+            Color reflectedCol = getRayColor(intersectPos, vR, recursionLevel + 1);
+            col = (colVec * (1 - material.glaze) + Vec3::fromColor(reflectedCol) * material.glaze).toColor();
+        }
+    }
+    return col;
+}
+
 void RayTracer::update(const UpdateInfo& info)
 {
     // Translate camera
     // WASD depends on camera rotation
 
-    constexpr float SPEED = 3.0;
+    constexpr float SPEED = 5.0;
     if (info.keySPACE)
         viewpoint = viewpoint + Vec3(0.0, SPEED * info.deltaTime, 0);
     if (info.keySHIFT)
