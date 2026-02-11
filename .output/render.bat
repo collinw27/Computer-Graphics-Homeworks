@@ -1,0 +1,1 @@
+ffmpeg -framerate 60 -i "img%%04d.png" -vf "scale=1024:1024" -c:v libx264 -pix_fmt yuv420p output.mp4

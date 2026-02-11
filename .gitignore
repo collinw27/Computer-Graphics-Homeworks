@@ -1,7 +1,9 @@
 .vscode
-.output
+.output/img*.png
+.output/output.mp4
 glew32.dll
 glfw3.dll
 instructions.pdf
 HW2.exe
 sfml*.dll
+video1.mp4

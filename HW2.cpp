@@ -14,7 +14,7 @@ const unsigned int SCR_HEIGHT = 800;
 const unsigned int RESOLUTION = 256;
 
 // Set to negative to not render video
-constexpr int videoLength = 4 * 60;
+constexpr int videoLength = 12 * 60;
 
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"

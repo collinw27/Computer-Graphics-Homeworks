@@ -5,6 +5,8 @@
 
 #include "SFML/Graphics.hpp"
 
+constexpr float pi = 3.1415926535;
+
 struct Color
 {
     unsigned char r, g, b;
@@ -37,6 +39,11 @@ public:
     Vec3 operator*(float scalar)
     {
         return Vec3(x * scalar, y * scalar, z * scalar);
+    }
+
+    Vec3 operator*(const Vec3& other)
+    {
+        return Vec3(x * other.x, y * other.y, z * other.z);
     }
 
     float dot(const Vec3& other)
@@ -248,20 +255,22 @@ RayTracer::RayTracer()
 
     // Create scene objects
 
-    shapes.push_back(new Sphere(Vec3(0.0, -2.0, -3.0), 1.0, Color{255, 100, 100}));
-    shapes.push_back(new Sphere(Vec3(-3.0, -1.4, -3.0), 1.6, Color{100, 255, 100}));
-    lights.push_back(new Light{Vec3(-5.0, 2.0, -3.0), 3.0, 0.2});
-    lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 0.4, 0.1});
-
+    Material greenMat{Color{100, 255, 100}};
+    greenMat.kS = 0.2;
+    greenMat.N = 20;
     Material blueMat{Color{100, 100, 255}};
     blueMat.kS = 0.3;
     blueMat.N = 30;
-    shapes.push_back(new Sphere(Vec3(0.0, -2.0, -5.0), 1.0, blueMat));
-    
     Material planeMat{Color{80, 80, 80}};
     planeMat.kS = 0.0;
     planeMat.glaze = 0.2;
+
+    shapes.push_back(new Sphere(Vec3(1.0, -2.0, -3.0), 1.0, Color{255, 100, 100}));
+    shapes.push_back(new Sphere(Vec3(-2.0, -1.4, -3.0), 1.6, greenMat));
+    shapes.push_back(new Sphere(Vec3(1.0, -2.0, -5.0), 1.0, blueMat));
     shapes.push_back(new Plane(Vec3(0.0, -3.0, 0.0), Vec3(0.0, 1.0, 0.0), planeMat));
+    lights.push_back(new Light{Vec3(-5.0, 2.0, -3.0), 3.0, 0.2});
+    lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 0.4, 0.1});
 }
 
 void RayTracer::update(const UpdateInfo& info)
@@ -471,21 +480,40 @@ void RayTracer::renderFrame(int frame, unsigned char* image, int width, int heig
 {
     float T = frame / 60.0;
     
-    // [0, 2]: Start with slow pan
+    // [0, 4]: Rotate around the spheres
 
-    if (T < 2.0)
+    if (T < 4.0)
     {
-        float x = lerp(-5, 2, ease(inverse_lerp(0, 2, T)));
-        viewpoint = Vec3(x, 0, 3);
+        float t = ease(inverse_lerp(0, 4, T));
+        float angle = t * 2 * pi + pi;
+        viewpoint = Vec3(std::sin(angle) * 9, 0, std::cos(angle) * 9 - 3);
+        lookAt = (Vec3(0, -3, -3) - viewpoint).normalized();
+        upVec = (lookAt.rotateXZ(pi / 2) * Vec3(1, 0, 1)).cross(lookAt).normalized();
     }
 
-    // [2, 3]: Move camera up, angle down
+    // [4, 6]: Move closer
+    // [6, 8]: Move back
 
-    else if (T < 3.0)
+    else if (T < 6.0)
     {
-        float t = ease(inverse_lerp(2, 3, T));
-        viewpoint = Vec3(2, t * 4, 3);
-        lookAt = (Vec3(2, 0, 0) - viewpoint).normalized();
+        float t = ease(inverse_lerp(4, 6, T));
+        viewpoint = Vec3(0, 0, -12 + 6 * t);
+    }
+    else if (T < 8.0)
+    {
+        float t = ease(inverse_lerp(6, 8, T));
+        viewpoint = Vec3(0, 0, -6 - 6 * t);
+    }
+
+    // [8, 11]: Angle camera above spheres
+
+    else if (T < 11.0)
+    {
+        float t = ease(inverse_lerp(8, 11, T));
+        float angle = t * pi / 2;
+        viewpoint = Vec3(0, 9 * std::sin(angle), -3 - 9 * std::cos(angle));
+        lookAt = (Vec3(0, -3, -3) - viewpoint).normalized();
+        upVec = (lookAt.rotateXZ(pi / 2) * Vec3(1, 0, 1)).cross(lookAt).normalized();
     }
 
     // Finally, render it
