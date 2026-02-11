@@ -1,8 +1,9 @@
-
 #include <cmath>
 #include <iostream>
 #include <vector>
 #include <string>
+
+#include "SFML/Graphics.hpp"
 
 struct Color
 {
@@ -231,6 +232,7 @@ public:
     RayTracer();
     void update(const UpdateInfo& info);
     void createImage(unsigned char* image, int width, int height);
+    void saveImage(const std::string& filename, unsigned char* image, int width, int height);
 };
 
 RayTracer::RayTracer()
@@ -261,6 +263,47 @@ RayTracer::RayTracer()
     planeMat.kS = 0.0;
     planeMat.glaze = 0.2;
     shapes.push_back(new Plane(Vec3(0.0, -3.0, 0.0), Vec3(0.0, 1.0, 0.0), planeMat));
+}
+
+void RayTracer::update(const UpdateInfo& info)
+{
+    // Translate camera
+    // WASD depends on camera rotation
+
+    constexpr float SPEED = 5.0;
+    if (info.keySPACE)
+        viewpoint = viewpoint + Vec3(0.0, SPEED * info.deltaTime, 0);
+    if (info.keySHIFT)
+        viewpoint = viewpoint + Vec3(0.0, -SPEED * info.deltaTime, 0);
+    Vec3 translate {};
+    if (info.keyW)
+        translate = translate + Vec3(0.0, 0.0, -1.0);
+    if (info.keyA)
+        translate = translate + Vec3(-1.0, 0.0, 0.0);
+    if (info.keyS)
+        translate = translate + Vec3(0.0, 0.0, 1.0);
+    if (info.keyD)
+        translate = translate + Vec3(1.0, 0.0, 0.0);
+    translate = translate.rotateXZ(std::atan2(lookAt.x, -lookAt.z));
+    viewpoint = viewpoint + translate * SPEED * info.deltaTime;
+
+    // Rotate camera
+
+    constexpr float RSPEED = 2.0;
+    if (info.keyE || info.keyR)
+    {
+        float angle = std::atan2(lookAt.z, lookAt.x);
+        angle += (info.keyE ? -RSPEED : RSPEED) * info.deltaTime;
+        lookAt.x = std::cos(angle);
+        lookAt.z = std::sin(angle);
+    }
+
+    // Toggle perspective
+
+    if (info.keyP)
+    {
+        doPerspective = !doPerspective;
+    }
 }
 
 void RayTracer::createImage(unsigned char* image, int width, int height)
@@ -301,6 +344,18 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
             image[idx+2] = col.b;
         }
     }
+}
+
+void RayTracer::saveImage(const std::string& filename, unsigned char* image, int width, int height)
+{
+    sf::Image img = sf::Image(sf::Vector2u(width, height));
+    for (int x = 0; x < width; x++)
+        for (int y = 0; y < width; y++)
+        {
+            int idx = ((height - 1 - y) * width + x) * 3;
+            img.setPixel(sf::Vector2u(x, y), sf::Color(image[idx], image[idx+1], image[idx+2]));
+        }
+    bool _result = img.saveToFile(std::filesystem::path(filename));
 }
 
 Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
@@ -394,45 +449,4 @@ Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
         }
     }
     return col;
-}
-
-void RayTracer::update(const UpdateInfo& info)
-{
-    // Translate camera
-    // WASD depends on camera rotation
-
-    constexpr float SPEED = 5.0;
-    if (info.keySPACE)
-        viewpoint = viewpoint + Vec3(0.0, SPEED * info.deltaTime, 0);
-    if (info.keySHIFT)
-        viewpoint = viewpoint + Vec3(0.0, -SPEED * info.deltaTime, 0);
-    Vec3 translate {};
-    if (info.keyW)
-        translate = translate + Vec3(0.0, 0.0, -1.0);
-    if (info.keyA)
-        translate = translate + Vec3(-1.0, 0.0, 0.0);
-    if (info.keyS)
-        translate = translate + Vec3(0.0, 0.0, 1.0);
-    if (info.keyD)
-        translate = translate + Vec3(1.0, 0.0, 0.0);
-    translate = translate.rotateXZ(std::atan2(lookAt.x, -lookAt.z));
-    viewpoint = viewpoint + translate * SPEED * info.deltaTime;
-
-    // Rotate camera
-
-    constexpr float RSPEED = 2.0;
-    if (info.keyE || info.keyR)
-    {
-        float angle = std::atan2(lookAt.z, lookAt.x);
-        angle += (info.keyE ? -RSPEED : RSPEED) * info.deltaTime;
-        lookAt.x = std::cos(angle);
-        lookAt.z = std::sin(angle);
-    }
-
-    // Toggle perspective
-
-    if (info.keyP)
-    {
-        doPerspective = !doPerspective;
-    }
 }

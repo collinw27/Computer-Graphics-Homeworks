@@ -1,5 +1,7 @@
 .vscode
+.output
 glew32.dll
 glfw3.dll
 instructions.pdf
 HW2.exe
+sfml*.dll

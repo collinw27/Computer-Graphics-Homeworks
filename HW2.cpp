@@ -161,6 +161,7 @@ int main()
     const int height = 256; // keep it in powers of 2!
     unsigned char image[width*height*3];
     rayTracer.createImage(image, width, height);
+    rayTracer.saveImage(".output/test.png", image, width, height);
 
     unsigned char *data = &image[0];
     if (data)
