@@ -11,6 +11,10 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
+const unsigned int RESOLUTION = 256;
+
+// Set to negative to not render video
+constexpr int videoLength = 4 * 60;
 
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
@@ -34,7 +38,7 @@ const char *fragmentShaderSource = "#version 330 core\n"
     "{\n"
     "   FragColor = texture(texture1, TexCoord);\n"
     "}\n\0";
-    
+
 
 int main()
 {
@@ -157,11 +161,10 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // Create the image (RGB Array) to be displayed
-    const int width  = 256; // keep it in powers of 2!
-    const int height = 256; // keep it in powers of 2!
+    const int width  = RESOLUTION; // keep it in powers of 2!
+    const int height = RESOLUTION; // keep it in powers of 2!
     unsigned char image[width*height*3];
     rayTracer.createImage(image, width, height);
-    rayTracer.saveImage(".output/test.png", image, width, height);
 
     unsigned char *data = &image[0];
     if (data)
@@ -183,6 +186,9 @@ int main()
         GLFW_KEY_SPACE, GLFW_KEY_LEFT_SHIFT, GLFW_KEY_E, GLFW_KEY_R};
     bool keyStates[8] = {false, false, false, false, false, false, false, false};
     bool holdingP = false;
+
+    // video exporting
+    int frameNum = 0;
 
     // render loop
     // -----------
@@ -208,15 +214,24 @@ int main()
         };
         holdingP = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
         lastTime = currentTime;
-        rayTracer.update(updateInfo);
 
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // different update behavior based on video exporting
+        if (frameNum >= videoLength)
+        {
+            rayTracer.update(updateInfo);
+            rayTracer.createImage(image, width, height);
+        }
+        else
+        {
+            rayTracer.renderFrame(frameNum++, image, width, height);
+        }
+
         // update image
-        rayTracer.createImage(image, width, height);
         unsigned char *data = &image[0];
         if (data)
         {

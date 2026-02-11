@@ -223,16 +223,15 @@ class RayTracer
     std::vector<Shape3D*> shapes;
     std::vector<Light*> lights;
 
-    // Misc constants
-
     Color getRayColor(Vec3 S, Vec3 D, int recursionLevel);
+    void saveImage(const std::string& filename, unsigned char* image, int width, int height);
 
 public:
 
     RayTracer();
     void update(const UpdateInfo& info);
     void createImage(unsigned char* image, int width, int height);
-    void saveImage(const std::string& filename, unsigned char* image, int width, int height);
+    void renderFrame(int frame, unsigned char* image, int width, int height);
 };
 
 RayTracer::RayTracer()
@@ -242,8 +241,8 @@ RayTracer::RayTracer()
     viewpoint = Vec3(0, 0, 0);
     lookAt = Vec3(0, 0, -1);
     upVec = Vec3(0, 1, 0);
-    viewW = 8.0;
-    viewH = 8.0;
+    viewW = 6.0;
+    viewH = 6.0;
     projDist = 5.0; 
     doPerspective = true;
 
@@ -449,4 +448,51 @@ Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
         }
     }
     return col;
+}
+
+// Helper functions for rendering
+
+float ease(float x)
+{
+    return (x < 0.5) ? (4 * std::pow(x, 3.0)) : (1 - std::pow(-2 * x + 2, 3) * 0.5);
+}
+
+float lerp(float a, float b, float x)
+{
+    return a + x * (b - a);
+}
+
+float inverse_lerp(float a, float b, float x)
+{
+    return std::min(std::max((x - a) / (b - a), 0.f), 1.f);
+}
+
+void RayTracer::renderFrame(int frame, unsigned char* image, int width, int height)
+{
+    float T = frame / 60.0;
+    
+    // [0, 2]: Start with slow pan
+
+    if (T < 2.0)
+    {
+        float x = lerp(-5, 2, ease(inverse_lerp(0, 2, T)));
+        viewpoint = Vec3(x, 0, 3);
+    }
+
+    // [2, 3]: Move camera up, angle down
+
+    else if (T < 3.0)
+    {
+        float t = ease(inverse_lerp(2, 3, T));
+        viewpoint = Vec3(2, t * 4, 3);
+        lookAt = (Vec3(2, 0, 0) - viewpoint).normalized();
+    }
+
+    // Finally, render it
+
+    createImage(image, width, height);
+    std::string paddedFrame = std::to_string(frame);
+    while (paddedFrame.length() < 4)
+        paddedFrame = '0' + paddedFrame;
+    saveImage(".output/img" + paddedFrame + ".png", image, width, height);
 }
