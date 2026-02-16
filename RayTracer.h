@@ -238,7 +238,7 @@ public:
 
 struct Light
 {
-    Vec3 position;
+    Vec3 direction;
     float intensity;
     float ambient;
 };
@@ -285,12 +285,12 @@ RayTracer::RayTracer()
 {
     // Set up scene parameters
 
-    // viewpoint = Vec3(0, 0, 0);
-    // lookAt = Vec3(0, 0, -1);
-    // upVec = Vec3(0, 1, 0);
-    viewpoint = Vec3(0, 0, 4);
-    lookAt = Vec3(0, -0.2, -1).normalized();
-    upVec = lookAt.cross(Vec3(-1, 0, 0)).normalized();
+    viewpoint = Vec3(0, 0, 0);
+    lookAt = Vec3(0, 0, -1);
+    upVec = Vec3(0, 1, 0);
+    // viewpoint = Vec3(0, 0, 4);
+    // lookAt = Vec3(0, -0.2, -1).normalized();
+    // upVec = lookAt.cross(Vec3(-1, 0, 0)).normalized();
     viewW = 6.0;
     viewH = 6.0;
     projDist = 5.0; 
@@ -315,8 +315,10 @@ RayTracer::RayTracer()
     shapes.push_back(new Sphere(Vec3(1.0, -2.0, -5.0), 1.0, blueMat));
     // shapes.push_back(new Sphere(Vec3(5.0, -1.0, -4.0), 2.0, translucentMat));
     shapes.push_back(new Plane(Vec3(0.0, -3.0, 0.0), Vec3(0.0, 1.0, 0.0), planeMat));
-    lights.push_back(new Light{Vec3(-5.0, 2.0, -3.0), 3.0, 0.2});
-    lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 0.4, 0.1});
+    // lights.push_back(new Light{Vec3(-5.0, 2.0, -3.0), 3.0, 0.2});
+    // lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 0.4, 0.1});
+    lights.push_back(new Light{Vec3(5.0, -4.0, 3.0), 3.0, 0.2});
+    lights.push_back(new Light{Vec3(-5.0, -5.0, 5.0), 0.4, 0.1});
 }
 
 void RayTracer::update(const UpdateInfo& info)
@@ -459,11 +461,11 @@ Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
             // Any object with smaller distance will block it (0.01 used for bias)
 
             bool isShadow = false;
-            Vec3 vL = (light->position - intersectPos).normalized();
-            float shadowDist = closest->checkIntersection(light->position, -vL) - 0.01;
+            Vec3 vL = -light->direction.normalized();
+            float shadowDist = closest->checkIntersection(intersectPos + vL * 100.0, -vL) - 0.01;
             for (Shape3D* shadowShape : shapes)
             {
-                float t = shadowShape->checkIntersection(light->position, -vL);
+                float t = shadowShape->checkIntersection(intersectPos + vL * 100.0, -vL);
                 if (t >= 0 && t < shadowDist && !shadowShape->material.translucent)
                 {
                     isShadow = true;
