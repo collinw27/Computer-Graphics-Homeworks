@@ -111,6 +111,12 @@ struct Material
     float translucent = false;
 };
 
+struct IntersectData
+{
+    float t;
+    Vec3 normal;
+};
+
 class Shape3D
 {
 public:
@@ -118,8 +124,7 @@ public:
     Material material;
 
     Shape3D(Material material) : material{material} {}
-    virtual Vec3 getNormal(Vec3 intersectPos) = 0;
-    virtual float checkIntersection(Vec3 S, Vec3 D) = 0;
+    virtual IntersectData checkIntersection(Vec3 S, Vec3 D) = 0;
 };
 
 class Sphere : public Shape3D
@@ -137,7 +142,7 @@ public:
 
     // Returns a positive t if intersected, otherwise negative
 
-    virtual float checkIntersection(Vec3 S, Vec3 D) override
+    virtual IntersectData checkIntersection(Vec3 S, Vec3 D) override
     {
         Vec3 V (S - center);
         float quadB = 2 * V.dot(D);
@@ -149,14 +154,12 @@ public:
 
         float disc = quadB * quadB - 4 * quadC;
         if (disc >= 0)
-            return 0.5 * (-quadB - std::sqrt(disc));
+        {
+            float t = 0.5 * (-quadB - std::sqrt(disc));
+            return IntersectData{t, (S + D * t - center).normalized()};
+        }
         else
-            return -1.0;
-    }
-
-    virtual Vec3 getNormal(Vec3 intersectPos) override
-    {
-        return (intersectPos - center).normalized();
+            return IntersectData{-1, Vec3()};
     }
 };
 
@@ -173,7 +176,7 @@ public:
         this->normal = normal;
     }
 
-    virtual float checkIntersection(Vec3 S, Vec3 D) override
+    virtual IntersectData checkIntersection(Vec3 S, Vec3 D) override
     {
         // Using implicit plane equation and explicit ray equation:
         // (origin + tD - S) . normal = 0
@@ -182,59 +185,89 @@ public:
         // Don't show if viewed from behind
 
         if (D.dot(normal) > 0)
-            return -1;
+            return IntersectData{-1, Vec3()};
 
         float denominator = D.dot(normal);
         if (denominator == 0.0)
-            return -1;
+            return IntersectData{-1, Vec3()};
         else
-            return (origin - S).dot(normal) / denominator;
-    }
-
-    virtual Vec3 getNormal(Vec3) override
-    {
-        return normal;
+            return IntersectData{(origin - S).dot(normal) / denominator, normal};
     }
 };
 
-/*
-class Triangle : public Shape3D
+class PlaneTriangle : public Shape3D
 {
-    Vec3 origin;
+    // v1, v2, v3 specify vertices
+    // Should be specified in counterclockwise order
+
+    Vec3 v1, v2, v3;
     Vec3 normal;
 
 public:
 
-    Triangle(Vec3 point_1, Vec3 point_2, Vec3 point_3, Material material) : Shape3D{material}
+    PlaneTriangle(Vec3 v1, Vec3 v2, Vec3 v3, Material material)
+        : Shape3D{material}, v1{v1}, v2{v2}, v3{v3}
     {
-        this->origin = point_1;
-        this->normal = (point_2 - point_1).cross(point_3 - point_1);
+        normal = (v2 - v1).cross(v3 - v1).normalized();
     }
 
-    virtual float checkIntersection(Vec3 S, Vec3 D) override
+    virtual IntersectData checkIntersection(Vec3 S, Vec3 D) override
     {
-        // Using implicit plane equation and explicit ray equation:
-        // (origin + tD - S) . normal = 0
-        // Simplifying: t = (origin - S) . N / (D . N)
-
-        // Don't show if viewed from behind
+        // See Plane for plane intersection logic
 
         if (D.dot(normal) > 0)
-            return -1;
-
+            return IntersectData{-1, Vec3()};
         float denominator = D.dot(normal);
         if (denominator == 0.0)
-            return -1;
-        else
-            return (origin - S).dot(normal) / denominator;
-    }
+            return IntersectData{-1, Vec3()};
+        float t = (v1 - S).dot(normal) / denominator;
+        Vec3 x = S + D * t;
 
-    virtual Vec3 getNormal(Vec3) override
-    {
-        return normal;
+        // Check if intersection point is within bounds of triangle
+
+        return (
+            ((v2 - v1).cross(x - v1).dot(normal) > 0) &&
+            ((v3 - v2).cross(x - v2).dot(normal) > 0) &&
+            ((v1 - v3).cross(x - v3).dot(normal) > 0)
+        )
+            ? IntersectData{t, normal}
+            : IntersectData{-1, Vec3()};
     }
 };
-*/
+
+class Tetrahedron : public Shape3D
+{
+    PlaneTriangle t1, t2, t3, t4;
+
+public:
+
+    // t1, t2, t3 should be counterclockwise when viewed from bottom
+    // t4 should be top vertex
+
+    Tetrahedron(Vec3 v1, Vec3 v2, Vec3 v3, Vec3 v4, Material material)
+        : Shape3D{material},
+        t1{v1, v2, v3, material},
+        t2{v1, v3, v4, material},
+        t3{v3, v2, v4, material},
+        t4{v2, v1, v4, material}
+    {}
+
+    virtual IntersectData checkIntersection(Vec3 S, Vec3 D) override
+    {
+        // Since we are not rendering back-faces, finding any intersection is sufficient
+
+        IntersectData data = t1.checkIntersection(S, D);
+        if (data.t >= 0)
+            return data;
+        data = t2.checkIntersection(S, D);
+        if (data.t >= 0)
+            return data;
+        data = t3.checkIntersection(S, D);
+        if (data.t >= 0)
+            return data;
+        return t4.checkIntersection(S, D);
+    }
+};
 
 struct Light
 {
@@ -298,6 +331,7 @@ RayTracer::RayTracer()
 
     // Create scene objects
 
+    Material redMat{Color{255, 100, 100}};
     Material greenMat{Color{100, 255, 100}};
     greenMat.kS = 0.2;
     greenMat.N = 20;
@@ -310,13 +344,11 @@ RayTracer::RayTracer()
     planeMat.kS = 0.0;
     planeMat.glaze = 0.2;
 
-    shapes.push_back(new Sphere(Vec3(1.0, -2.0, -3.0), 1.0, Material{Color{255, 100, 100}}));
+    shapes.push_back(new Tetrahedron(Vec3(1, -3, -3), Vec3(4, -3, -2), Vec3(1, -3, 0), Vec3(2.5, 0, -2), redMat));
     shapes.push_back(new Sphere(Vec3(-2.0, -1.4, -3.0), 1.6, greenMat));
     shapes.push_back(new Sphere(Vec3(1.0, -2.0, -5.0), 1.0, blueMat));
     // shapes.push_back(new Sphere(Vec3(5.0, -1.0, -4.0), 2.0, translucentMat));
     shapes.push_back(new Plane(Vec3(0.0, -3.0, 0.0), Vec3(0.0, 1.0, 0.0), planeMat));
-    // lights.push_back(new Light{Vec3(-5.0, 2.0, -3.0), 3.0, 0.2});
-    // lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 0.4, 0.1});
     lights.push_back(new Light{Vec3(5.0, -4.0, 3.0), 3.0, 0.2});
     lights.push_back(new Light{Vec3(-5.0, -5.0, 5.0), 0.4, 0.1});
 }
@@ -422,6 +454,7 @@ Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
     // Takes color from closest sphere
 
     Shape3D* closest = nullptr;
+    Vec3 closestNormal = Vec3();
     float smallestDist = 9999.0;
     for (Shape3D* shape : shapes)
     {
@@ -431,11 +464,12 @@ Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
         // Ray: R(t) = S + Dt
         // As a shorthand, V = S - C
 
-        float t = shape->checkIntersection(S, D);
-        if (t >= 0 && t < smallestDist)
+        IntersectData intersection = shape->checkIntersection(S, D);
+        if (intersection.t >= 0 && intersection.t < smallestDist)
         {
-            smallestDist = t;
+            smallestDist = intersection.t;
             closest = shape;
+            closestNormal = intersection.normal;
         }
     }
 
@@ -453,23 +487,25 @@ Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
 
         Vec3 intersectPos = S + D * smallestDist;
         Vec3 vE = (viewpoint - intersectPos).normalized();
-        Vec3 normal = closest->getNormal(intersectPos);
+        Vec3 normal = closestNormal;
         for (Light* light : lights)
         {
             // Shadow
             // Find distance from light to current object
             // Any object with smaller distance will block it (0.01 used for bias)
+            // Ignored if the object is already occluding itself
 
             bool isShadow = false;
             Vec3 vL = -light->direction.normalized();
-            float shadowDist = closest->checkIntersection(intersectPos + vL * 100.0, -vL) - 0.01;
-            for (Shape3D* shadowShape : shapes)
+            if (closest->checkIntersection(intersectPos + normal * 0.01, vL).t <= 0)
             {
-                float t = shadowShape->checkIntersection(intersectPos + vL * 100.0, -vL);
-                if (t >= 0 && t < shadowDist && !shadowShape->material.translucent)
+                for (Shape3D* shadowShape : shapes)
                 {
-                    isShadow = true;
-                    break;
+                    if (shadowShape->checkIntersection(intersectPos + normal * 0.01, vL).t > 0)
+                    {
+                        isShadow = true;
+                        break;
+                    }
                 }
             }
 
@@ -585,8 +621,9 @@ void RayTracer::renderFrame(int frame, unsigned char* image, int width, int heig
     if (T < 5.0)
     {
         float t = ease(inverse_lerp(0, 5, T));
-        lookAt = (Vec3(0, 0, 0) - viewpoint).normalized();
-        viewpoint = Vec3(14, 0, 1 - 11 * t);
+        float angle = t * 2.2 + 0.5;
+        viewpoint = Vec3(std::sin(angle) * 9 + 4, 0, std::cos(angle) * 9 - 3);
+        lookAt = (Vec3(0, 0, -3) - viewpoint).normalized();
     }
 
     #endif
