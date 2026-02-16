@@ -3,7 +3,11 @@
 #include <vector>
 #include <string>
 
+// #define INCLUDE_SFML
+
+#ifdef INCLUDE_SFML
 #include "SFML/Graphics.hpp"
+#endif
 
 constexpr float pi = 3.1415926535;
 
@@ -97,17 +101,14 @@ public:
     }
 };
 
-class Material
+struct Material
 {
-public:
-
     Color color;
     float kD = 0.3; // Diffuse coefficient
     float kS = 0.1; // Specular coefficient
     float N = 10.0;
     float glaze = -1.0; // Set to value in [0, 1] to mix color with reflected light
-
-    Material(Color color) : color{color} {}
+    float translucent = false;
 };
 
 class Shape3D
@@ -196,6 +197,45 @@ public:
     }
 };
 
+/*
+class Triangle : public Shape3D
+{
+    Vec3 origin;
+    Vec3 normal;
+
+public:
+
+    Triangle(Vec3 point_1, Vec3 point_2, Vec3 point_3, Material material) : Shape3D{material}
+    {
+        this->origin = point_1;
+        this->normal = (point_2 - point_1).cross(point_3 - point_1);
+    }
+
+    virtual float checkIntersection(Vec3 S, Vec3 D) override
+    {
+        // Using implicit plane equation and explicit ray equation:
+        // (origin + tD - S) . normal = 0
+        // Simplifying: t = (origin - S) . N / (D . N)
+
+        // Don't show if viewed from behind
+
+        if (D.dot(normal) > 0)
+            return -1;
+
+        float denominator = D.dot(normal);
+        if (denominator == 0.0)
+            return -1;
+        else
+            return (origin - S).dot(normal) / denominator;
+    }
+
+    virtual Vec3 getNormal(Vec3) override
+    {
+        return normal;
+    }
+};
+*/
+
 struct Light
 {
     Vec3 position;
@@ -208,7 +248,7 @@ struct Light
 struct UpdateInfo
 {
     float deltaTime;
-    bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT, keyE, keyR, keyP;
+    bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT, keyE, keyR, keyP, keyC;
 };
 
 // Handles the program logic of the ray tracer
@@ -245,9 +285,12 @@ RayTracer::RayTracer()
 {
     // Set up scene parameters
 
-    viewpoint = Vec3(0, 0, 0);
-    lookAt = Vec3(0, 0, -1);
-    upVec = Vec3(0, 1, 0);
+    // viewpoint = Vec3(0, 0, 0);
+    // lookAt = Vec3(0, 0, -1);
+    // upVec = Vec3(0, 1, 0);
+    viewpoint = Vec3(0, 0, 4);
+    lookAt = Vec3(0, -0.2, -1).normalized();
+    upVec = lookAt.cross(Vec3(-1, 0, 0)).normalized();
     viewW = 6.0;
     viewH = 6.0;
     projDist = 5.0; 
@@ -261,13 +304,16 @@ RayTracer::RayTracer()
     Material blueMat{Color{100, 100, 255}};
     blueMat.kS = 0.3;
     blueMat.N = 30;
+    Material translucentMat{Color{80, 255, 255}};
+    translucentMat.translucent = true;
     Material planeMat{Color{80, 80, 80}};
     planeMat.kS = 0.0;
     planeMat.glaze = 0.2;
 
-    shapes.push_back(new Sphere(Vec3(1.0, -2.0, -3.0), 1.0, Color{255, 100, 100}));
+    shapes.push_back(new Sphere(Vec3(1.0, -2.0, -3.0), 1.0, Material{Color{255, 100, 100}}));
     shapes.push_back(new Sphere(Vec3(-2.0, -1.4, -3.0), 1.6, greenMat));
     shapes.push_back(new Sphere(Vec3(1.0, -2.0, -5.0), 1.0, blueMat));
+    // shapes.push_back(new Sphere(Vec3(5.0, -1.0, -4.0), 2.0, translucentMat));
     shapes.push_back(new Plane(Vec3(0.0, -3.0, 0.0), Vec3(0.0, 1.0, 0.0), planeMat));
     lights.push_back(new Light{Vec3(-5.0, 2.0, -3.0), 3.0, 0.2});
     lights.push_back(new Light{Vec3(5.0, 5.0, -5.0), 0.4, 0.1});
@@ -309,9 +355,7 @@ void RayTracer::update(const UpdateInfo& info)
     // Toggle perspective
 
     if (info.keyP)
-    {
         doPerspective = !doPerspective;
-    }
 }
 
 void RayTracer::createImage(unsigned char* image, int width, int height)
@@ -356,6 +400,8 @@ void RayTracer::createImage(unsigned char* image, int width, int height)
 
 void RayTracer::saveImage(const std::string& filename, unsigned char* image, int width, int height)
 {
+    #ifdef INCLUDE_SFML
+
     sf::Image img = sf::Image(sf::Vector2u(width, height));
     for (int x = 0; x < width; x++)
         for (int y = 0; y < width; y++)
@@ -364,6 +410,8 @@ void RayTracer::saveImage(const std::string& filename, unsigned char* image, int
             img.setPixel(sf::Vector2u(x, y), sf::Color(image[idx], image[idx+1], image[idx+2]));
         }
     bool _result = img.saveToFile(std::filesystem::path(filename));
+
+    #endif
 }
 
 Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
@@ -416,7 +464,7 @@ Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
             for (Shape3D* shadowShape : shapes)
             {
                 float t = shadowShape->checkIntersection(light->position, -vL);
-                if (t >= 0 && t < shadowDist)
+                if (t >= 0 && t < shadowDist && !shadowShape->material.translucent)
                 {
                     isShadow = true;
                     break;
@@ -439,8 +487,7 @@ Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
 
         // Normal intensity adds object color
         // Specular intensity adds white light
-        // Shadow takes priority
-        
+
         intensity = std::min(1.f, intensity);
         specIntensity = std::min(1.f, specIntensity);
         Vec3 colVec = Vec3::fromColor(material.color) * intensity;
@@ -454,6 +501,16 @@ Color RayTracer::getRayColor(Vec3 S, Vec3 D, int recursionLevel)
             Vec3 vR = normal * normal.dot(vE) * 2.0 - vE;
             Color reflectedCol = getRayColor(intersectPos, vR, recursionLevel + 1);
             col = (colVec * (1 - material.glaze) + Vec3::fromColor(reflectedCol) * material.glaze).toColor();
+        }
+
+        // Translucent surface: mix color with second ray
+
+        if (material.translucent && recursionLevel < 3)
+        {
+            float alpha = 0.2;
+            alpha += intensity * 0.6;
+            Color behindCol = getRayColor(intersectPos + lookAt * 0.6, D, recursionLevel + 1);
+            col = (colVec * alpha + Vec3::fromColor(behindCol) * (1 - alpha)).toColor();
         }
     }
     return col;
@@ -479,6 +536,9 @@ float inverse_lerp(float a, float b, float x)
 void RayTracer::renderFrame(int frame, unsigned char* image, int width, int height)
 {
     float T = frame / 60.0;
+
+    #define NORMAL_DEMO
+    #ifdef NORMAL_DEMO
     
     // [0, 4]: Rotate around the spheres
 
@@ -515,6 +575,19 @@ void RayTracer::renderFrame(int frame, unsigned char* image, int width, int heig
         lookAt = (Vec3(0, -3, -3) - viewpoint).normalized();
         upVec = (lookAt.rotateXZ(pi / 2) * Vec3(1, 0, 1)).cross(lookAt).normalized();
     }
+
+    #else
+
+    // [0, 5]: Pan around spheres
+
+    if (T < 5.0)
+    {
+        float t = ease(inverse_lerp(0, 5, T));
+        lookAt = (Vec3(0, 0, 0) - viewpoint).normalized();
+        viewpoint = Vec3(14, 0, 1 - 11 * t);
+    }
+
+    #endif
 
     // Finally, render it
 

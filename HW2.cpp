@@ -14,7 +14,7 @@ const unsigned int SCR_HEIGHT = 800;
 const unsigned int RESOLUTION = 256;
 
 // Set to negative to not render video
-constexpr int videoLength = 12 * 60;
+constexpr int videoLength = -1 * 60;
 
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
@@ -186,6 +186,7 @@ int main()
         GLFW_KEY_SPACE, GLFW_KEY_LEFT_SHIFT, GLFW_KEY_E, GLFW_KEY_R};
     bool keyStates[8] = {false, false, false, false, false, false, false, false};
     bool holdingP = false;
+    bool holdingC = false;
 
     // video exporting
     int frameNum = 0;
@@ -210,9 +211,11 @@ int main()
             currentTime - lastTime,
             keyStates[0], keyStates[1], keyStates[2], keyStates[3],
             keyStates[4], keyStates[5], keyStates[6], keyStates[7],
-            !holdingP && glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS
+            !holdingP && glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS,
+            !holdingC && glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS
         };
         holdingP = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
+        holdingC = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
         lastTime = currentTime;
 
         // render
