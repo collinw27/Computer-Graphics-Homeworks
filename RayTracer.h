@@ -318,12 +318,12 @@ RayTracer::RayTracer()
 {
     // Set up scene parameters
 
-    viewpoint = Vec3(0, 0, 0);
+    viewpoint = Vec3(0, 0, 8);
     lookAt = Vec3(0, 0, -1);
     upVec = Vec3(0, 1, 0);
-    // viewpoint = Vec3(0, 0, 4);
-    // lookAt = Vec3(0, -0.2, -1).normalized();
-    // upVec = lookAt.cross(Vec3(-1, 0, 0)).normalized();
+    // viewpoint = Vec3(1, 0, -12);
+    // lookAt = (Vec3(0, -2, 0) - viewpoint).normalized();
+    // upVec = lookAt.cross(Vec3(12, 0, 1)).normalized();
     viewW = 6.0;
     viewH = 6.0;
     projDist = 5.0; 
@@ -347,7 +347,7 @@ RayTracer::RayTracer()
     shapes.push_back(new Tetrahedron(Vec3(1, -3, -3), Vec3(4, -3, -2), Vec3(1, -3, 0), Vec3(2.5, 0, -2), redMat));
     shapes.push_back(new Sphere(Vec3(-2.0, -1.4, -3.0), 1.6, greenMat));
     shapes.push_back(new Sphere(Vec3(1.0, -2.0, -5.0), 1.0, blueMat));
-    // shapes.push_back(new Sphere(Vec3(5.0, -1.0, -4.0), 2.0, translucentMat));
+    shapes.push_back(new Sphere(Vec3(5.0, -1.0, -4.0), 2.0, translucentMat));
     shapes.push_back(new Plane(Vec3(0.0, -3.0, 0.0), Vec3(0.0, 1.0, 0.0), planeMat));
     lights.push_back(new Light{Vec3(5.0, -4.0, 3.0), 3.0, 0.2});
     lights.push_back(new Light{Vec3(-5.0, -5.0, 5.0), 0.4, 0.1});
@@ -376,6 +376,7 @@ void RayTracer::update(const UpdateInfo& info)
     viewpoint = viewpoint + translate * SPEED * info.deltaTime;
 
     // Rotate camera
+    // NOTE: This doesn't work if the lookAt vector has a y-component
 
     constexpr float RSPEED = 2.0;
     if (info.keyE || info.keyR)
