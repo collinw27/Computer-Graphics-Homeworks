@@ -2,7 +2,8 @@
 #include <GL/glew.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include "Functions.h"
+#include "MeshViewer.h"
+#include <gtc/type_ptr.hpp>
 
 #include <iostream>
 
@@ -17,12 +18,12 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main()
 {
-    std::string vertexShaderString = loadShader("monkey.vs").c_str();
-    std::string fragmentShaderString = loadShader("monkey.fs").c_str();
+    MeshViewer mesh_viewer {};
+
+    std::string vertexShaderString = load_shader("monkey.vs").c_str();
+    std::string fragmentShaderString = load_shader("monkey.fs").c_str();
     const char* vertexShaderSource = vertexShaderString.c_str();
     const char* fragmentShaderSource = fragmentShaderString.c_str();
-
-    std::cout << std::string(vertexShaderSource) << std::endl;
 
     // glfw: initialize and configure
     // ------------------------------
@@ -93,16 +94,9 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    float vertices[] {
-        -0.5f, -.25f, 0.0f, 1.f, 0.f, 0.f,      // left
-         0.5f, -.75f, 0.0f, 1.f, 1.f, 0.f,      // right
-         0.0f,  0.5f, 0.0f, 0.f, 1.f, 1.f,       // top
-
-        -0.5f, -0.5f, 0.0f, 1.f, 0.f, 0.f,      // left
-         0.5f, -0.5f, 0.0f, 1.f, 1.f, 0.f,      // right
-         0.0f, -1.0f, 0.0f, 0.f, 1.f, 1.f       // bottom
-    };
-    unsigned int numVertices = sizeof(vertices)/3;
+    std::vector<float> vertexVec = load_vertices("cube.obj");
+    float* vertices = vertexVec.data();
+    unsigned int numVertices = vertexVec.size() * sizeof(float) /3;
 
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
@@ -111,23 +105,26 @@ int main()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexVec.size() * sizeof(float), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    // COLORS
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
 
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    glBindVertexArray(0); 
+    glBindVertexArray(0);
+   
+    // start tracking time
+    float currentTime = glfwGetTime();
+    float lastTime = currentTime;
 
+    // start tracking keys
+    int keys[] = {GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D,
+        GLFW_KEY_SPACE, GLFW_KEY_LEFT_SHIFT};
+    bool keyStates[] = {false, false, false, false, false, false};
 
     // uncomment this call to draw in wireframe polygons.
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -139,6 +136,32 @@ int main()
         // input
         // -----
         processInput(window);
+        
+        // process updates
+        currentTime = glfwGetTime();
+        for (int i = 0; i < 6; i++)
+        {
+            int keyState = glfwGetKey(window, keys[i]);
+            keyStates[i] = keyStates[i] || (keyState == GLFW_PRESS);
+            keyStates[i] = keyStates[i] && !(keyState == GLFW_RELEASE);
+        }
+        UpdateInfo updateInfo {
+            currentTime - lastTime,
+            keyStates[0], keyStates[1], keyStates[2], keyStates[3],
+            keyStates[4], keyStates[5]
+        };
+        lastTime = currentTime;
+
+        mesh_viewer.update(updateInfo);
+
+        // update model matrix
+        glm::mat4 model_mat = glm::inverse(mesh_viewer.get_model_mat());
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model_mat"), 1, GL_FALSE, glm::value_ptr(model_mat));
+        glm::mat4 view_mat = glm::mat4(1.f);
+        view_mat = glm::translate(view_mat, glm::vec3(0.f, 0.f, -3.f));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
+        glm::mat4 perspective_mat = glm::perspective(glm::radians(45.f), 800.f / 600.f, 0.1f, 100.f);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "perspective"), 1, GL_FALSE, glm::value_ptr(perspective_mat));
 
         // render
         // ------
