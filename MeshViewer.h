@@ -5,16 +5,122 @@
 #include <cmath>
 #include "glm.hpp"
 
-std::string load_shader(std::string filepath)
+struct UpdateInfo
+{
+    float deltaTime;
+    bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT;
+    bool keyLEFT, keyRIGHT, keyUP, keyDOWN;
+    bool keyENTER, keyE, keyR, keyZ;
+};
+
+class MeshViewer
+{
+    std::string vs;
+    std::string fs;
+    std::vector<float> verts;
+
+    glm::vec3 translation;
+    float x_rotation = 0.f;
+    float y_rotation = 0.f;
+    float scale = 1.0;
+
+public:
+
+    MeshViewer(std::string vs, std::string fs, std::string obj);
+    void update(const UpdateInfo& info);
+    glm::mat4 get_model_mat();
+
+    std::string vertex_shader();
+    std::string fragment_shader();
+    std::vector<float> vertices();
+
+private:
+
+    std::string load_shader(std::string filepath);
+    std::vector<float> load_vertices(std::string filepath);
+};
+
+MeshViewer::MeshViewer(std::string vs, std::string fs, std::string obj)
+{
+    this->vs = load_shader(vs);
+    this->fs = load_shader(fs);
+    this->verts = load_vertices(obj);
+    translation = glm::vec3();
+}
+
+void MeshViewer::update(const UpdateInfo& info)
+{
+    glm::vec3 delta {};
+    if (info.keyW)
+        delta = delta + glm::vec3(0.0, 0.0, -1.0);
+    if (info.keyA)
+        delta = delta + glm::vec3(-1.0, 0.0, 0.0);
+    if (info.keyS)
+        delta = delta + glm::vec3(0.0, 0.0, 1.0);
+    if (info.keyD)
+        delta = delta + glm::vec3(1.0, 0.0, 0.0);
+    if (info.keySHIFT)
+        delta = delta + glm::vec3(0.0, -1.0, 0.0);
+    if (info.keySPACE)
+        delta = delta + glm::vec3(0.0, 1.0, 0.0);
+    if (info.keyLEFT)
+        x_rotation += info.deltaTime;
+    if (info.keyRIGHT)
+        x_rotation -= info.deltaTime;
+    if (info.keyUP)
+        y_rotation -= info.deltaTime;
+    if (info.keyDOWN)
+        y_rotation += info.deltaTime;
+    if (info.keyE)
+        scale = std::max(scale - info.deltaTime, 0.2f);
+    if (info.keyR)
+        scale += info.deltaTime;
+    translation = translation + delta * info.deltaTime;
+}
+
+glm::mat4 MeshViewer::get_model_mat()
+{
+    auto T = glm::mat4(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        translation.x, translation.y, translation.z, 1
+    );
+    auto R_X = glm::mat4(
+        cos(x_rotation), 0, sin(x_rotation), 0,
+        0, 1, 0, 0,
+        -sin(x_rotation), 0, cos(x_rotation), 0,
+        0, 0, 0, 1
+    );
+    auto R_Y = glm::mat4(
+        1, 0, 0, 0,
+        0, cos(y_rotation), sin(y_rotation), 0,
+        0, -sin(y_rotation), cos(y_rotation), 0,
+        0, 0, 0, 1
+    );
+    auto S = glm::mat4(
+        scale, 0, 0, 0,
+        0, scale, 0, 0,
+        0, 0, scale, 0,
+        0, 0, 0, 1
+    );
+    return S * R_Y * R_X * T;
+}
+
+std::string MeshViewer::vertex_shader() { return vs; }
+std::string MeshViewer::fragment_shader() { return fs; }
+std::vector<float> MeshViewer::vertices() { return verts; }
+
+std::string MeshViewer::load_shader(std::string filepath)
 {
     std::ifstream file{filepath};
     if (!file.is_open())
         throw new std::runtime_error("Could not open file!");
     std::string a = (std::stringstream{} << file.rdbuf()).str();
-    return a;
+    return std::string(a);
 }
 
-std::vector<float> load_vertices(std::string filepath)
+std::vector<float> MeshViewer::load_vertices(std::string filepath)
 {
     std::ifstream file{filepath};
     if (!file.is_open())
@@ -48,115 +154,4 @@ std::vector<float> load_vertices(std::string filepath)
         }
     }
     return vertices;
-}
-
-
-class Vec3
-{
-public:
-
-    float x, y, z;
-
-    Vec3() : x{0}, y{0}, z{0} {}
-    Vec3(float x, float y, float z) : x{x}, y{y}, z{z} {}
-
-    Vec3 operator-()
-    {
-        return Vec3(-x, -y, -z);
-    }
-
-    Vec3 operator+(const Vec3& other)
-    {
-        return Vec3(x + other.x, y + other.y, z + other.z);
-    }
-
-    Vec3 operator-(const Vec3& other)
-    {
-        return Vec3(x - other.x, y - other.y, z - other.z);
-    }
-
-    Vec3 operator*(float scalar)
-    {
-        return Vec3(x * scalar, y * scalar, z * scalar);
-    }
-
-    Vec3 operator*(const Vec3& other)
-    {
-        return Vec3(x * other.x, y * other.y, z * other.z);
-    }
-
-    float dot(const Vec3& other)
-    {
-        return x * other.x + y * other.y + z * other.z;
-    }
-
-    Vec3 cross(const Vec3& other)
-    {
-        return Vec3(
-            y * other.z - z * other.y,
-            z * other.x - x * other.z,
-            x * other.y - y * other.x
-        );
-    }
-
-    float length()
-    {
-        return std::sqrt(x * x + y * y + z * z);
-    }
-
-    Vec3 normalized()
-    {
-        float l = length();
-        return Vec3(x / l, y / l, z / l);
-    }
-
-    std::string str()
-    {
-        return "(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ")";
-    }
-};
-
-struct UpdateInfo
-{
-    float deltaTime;
-    bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT;
-};
-
-class MeshViewer
-{
-    Vec3 translation;
-
-public:
-
-    void update(const UpdateInfo& info);
-    glm::mat4 get_model_mat();
-};
-
-void MeshViewer::update(const UpdateInfo& info)
-{
-    Vec3 delta {};
-    if (info.keyW)
-        delta = delta + Vec3(0.0, 0.0, -1.0);
-    if (info.keyA)
-        delta = delta + Vec3(-1.0, 0.0, 0.0);
-    if (info.keyS)
-        delta = delta + Vec3(0.0, 0.0, 1.0);
-    if (info.keyD)
-        delta = delta + Vec3(1.0, 0.0, 0.0);
-    if (info.keySHIFT)
-        delta = delta + Vec3(0.0, -1.0, 0.0);
-    if (info.keySPACE)
-        delta = delta + Vec3(0.0, 1.0, 0.0);
-    translation = translation + delta * info.deltaTime;
-    std::cout << translation.str() << std::endl;
-}
-
-glm::mat4 MeshViewer::get_model_mat()
-{
-    return glm::mat4(
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        translation.x, translation.y, translation.z, 1
-    );
 }

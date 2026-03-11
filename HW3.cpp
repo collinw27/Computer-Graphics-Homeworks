@@ -18,12 +18,17 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main()
 {
-    MeshViewer mesh_viewer {};
+    MeshViewer mesh_viewer(
+        "monkey.vs",
+        "monkey.fs",
+        "monkey.obj"
+    );
 
-    std::string vertexShaderString = load_shader("monkey.vs").c_str();
-    std::string fragmentShaderString = load_shader("monkey.fs").c_str();
-    const char* vertexShaderSource = vertexShaderString.c_str();
-    const char* fragmentShaderSource = fragmentShaderString.c_str();
+    std::string vertexShaderString = mesh_viewer.vertex_shader();
+    std::string fragmentShaderString = mesh_viewer.fragment_shader();
+    const char* vertexShaderSource {vertexShaderString.c_str()};
+    const char* fragmentShaderSource {fragmentShaderString.c_str()};
+    std::cout << vertexShaderSource << std::endl;
 
     // glfw: initialize and configure
     // ------------------------------
@@ -94,7 +99,7 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    std::vector<float> vertexVec = load_vertices("cube.obj");
+    std::vector<float> vertexVec = mesh_viewer.vertices();
     float* vertices = vertexVec.data();
     unsigned int numVertices = vertexVec.size() * sizeof(float) /3;
 
@@ -122,12 +127,18 @@ int main()
     float lastTime = currentTime;
 
     // start tracking keys
-    int keys[] = {GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D,
-        GLFW_KEY_SPACE, GLFW_KEY_LEFT_SHIFT};
-    bool keyStates[] = {false, false, false, false, false, false};
+    int keys[14] = {GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D,
+        GLFW_KEY_SPACE, GLFW_KEY_LEFT_SHIFT, GLFW_KEY_LEFT, GLFW_KEY_RIGHT,
+        GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_ENTER, GLFW_KEY_E, GLFW_KEY_R, GLFW_KEY_Z
+    };
+    bool keyStates[14] = {false, false, false, false, false, false, false,
+        false, false, false, false, false, false, false
+    };
 
     // uncomment this call to draw in wireframe polygons.
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    auto a = glGetError();
 
     // render loop
     // -----------
@@ -139,7 +150,7 @@ int main()
         
         // process updates
         currentTime = glfwGetTime();
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 13; i++)
         {
             int keyState = glfwGetKey(window, keys[i]);
             keyStates[i] = keyStates[i] || (keyState == GLFW_PRESS);
@@ -148,15 +159,18 @@ int main()
         UpdateInfo updateInfo {
             currentTime - lastTime,
             keyStates[0], keyStates[1], keyStates[2], keyStates[3],
-            keyStates[4], keyStates[5]
+            keyStates[4], keyStates[5], keyStates[6], keyStates[7],
+            keyStates[8], keyStates[9], keyStates[10], keyStates[11],
+            keyStates[12]
         };
         lastTime = currentTime;
 
         mesh_viewer.update(updateInfo);
 
         // update model matrix
-        glm::mat4 model_mat = glm::inverse(mesh_viewer.get_model_mat());
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model_mat"), 1, GL_FALSE, glm::value_ptr(model_mat));
+        glm::mat4 model_mat = mesh_viewer.get_model_mat();
+        auto model_loc = glGetUniformLocation(shaderProgram, "model_mat");
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model_mat));
         glm::mat4 view_mat = glm::mat4(1.f);
         view_mat = glm::translate(view_mat, glm::vec3(0.f, 0.f, -3.f));
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
@@ -172,7 +186,7 @@ int main()
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         glDrawArrays(GL_TRIANGLES, 0, numVertices);
-        // glBindVertexArray(0); // unbind our VA no need to unbind it every time 
+        // glBindVertexArray(0); // unbind our VA no need to unbind it every time
  
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
