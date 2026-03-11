@@ -3,3 +3,9 @@ HW3.exe: HW3.cpp Functions.h
 	-L../GLFW/lib -L../GLEW/lib \
 	-I../GLFW/include -I../GLEW/include \
 	-o HW3.exe
+
+TriangleExample: TriangleExample.cpp
+	g++ TriangleExample.cpp -lglfw3 -lopengl32 -lgdi32 -lglew32 \
+	-L../GLFW/lib -L../GLEW/lib \
+	-I../GLFW/include -I../GLEW/include \
+	-o HW3.exe
