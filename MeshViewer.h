@@ -9,30 +9,45 @@ struct UpdateInfo
 {
     float deltaTime;
     bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT;
-    bool keyLEFT, keyRIGHT, keyUP, keyDOWN;
-    bool keyENTER, keyE, keyR, keyZ;
+    bool keyLEFT, keyRIGHT, keyUP, keyDOWN, keyE, keyR;
+    bool keyENTER;
 };
 
-class MeshViewer
+struct Mesh
 {
     std::string vs;
     std::string fs;
     std::vector<float> verts;
 
-    glm::vec3 translation;
+    glm::vec3 position;
     float x_rotation = 0.f;
     float y_rotation = 0.f;
     float scale = 1.0;
+};
+
+struct GLMesh
+{
+    unsigned VAO, VBO;
+    unsigned shaderProgram;
+    unsigned vertexCount;
+};
+
+class MeshViewer
+{
+    unsigned mesh_count;
+    std::vector<Mesh> meshes;
+    int current_index = 0;
 
 public:
 
-    MeshViewer(std::string vs, std::string fs, std::string obj);
+    MeshViewer();
+    void add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos);
     void update(const UpdateInfo& info);
-    glm::mat4 get_model_mat();
 
-    std::string vertex_shader();
-    std::string fragment_shader();
-    std::vector<float> vertices();
+    std::string get_vertex_shader(unsigned mesh_index);
+    std::string get_fragment_shader(unsigned mesh_index);
+    std::vector<float> get_vertices(unsigned mesh_index);
+    glm::mat4 get_model_mat(unsigned mesh_index);
 
 private:
 
@@ -40,16 +55,18 @@ private:
     std::vector<float> load_vertices(std::string filepath);
 };
 
-MeshViewer::MeshViewer(std::string vs, std::string fs, std::string obj)
+MeshViewer::MeshViewer() : meshes{} {}
+
+void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos)
 {
-    this->vs = load_shader(vs);
-    this->fs = load_shader(fs);
-    this->verts = load_vertices(obj);
-    translation = glm::vec3();
+    meshes.push_back(Mesh{load_shader(vs), load_shader(fs), load_vertices(obj), start_pos});
 }
 
 void MeshViewer::update(const UpdateInfo& info)
 {
+    // Transform mesh using inputs
+
+    Mesh& current = meshes.at(current_index);
     glm::vec3 delta {};
     if (info.keyW)
         delta = delta + glm::vec3(0.0, 0.0, -1.0);
@@ -64,52 +81,64 @@ void MeshViewer::update(const UpdateInfo& info)
     if (info.keySPACE)
         delta = delta + glm::vec3(0.0, 1.0, 0.0);
     if (info.keyLEFT)
-        x_rotation += info.deltaTime;
+        current.x_rotation += info.deltaTime * 2;
     if (info.keyRIGHT)
-        x_rotation -= info.deltaTime;
+        current.x_rotation -= info.deltaTime * 2;
     if (info.keyUP)
-        y_rotation -= info.deltaTime;
+        current.y_rotation -= info.deltaTime * 2;
     if (info.keyDOWN)
-        y_rotation += info.deltaTime;
+        current.y_rotation += info.deltaTime * 2;
     if (info.keyE)
-        scale = std::max(scale - info.deltaTime, 0.2f);
+        current.scale = std::max(current.scale - info.deltaTime, 0.2f);
     if (info.keyR)
-        scale += info.deltaTime;
-    translation = translation + delta * info.deltaTime;
+        current.scale += info.deltaTime;
+    current.position = current.position + delta * info.deltaTime;
+
+    // Switch between meshes
+
+    if (info.keyENTER)
+    {
+        current_index = (current_index + 1) % meshes.size();
+        std::cout << "Selected mesh #" << current_index << std::endl;
+    }
 }
 
-glm::mat4 MeshViewer::get_model_mat()
+glm::mat4 MeshViewer::get_model_mat(unsigned mesh_index)
 {
+    Mesh& mesh = meshes.at(mesh_index);
     auto T = glm::mat4(
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
-        translation.x, translation.y, translation.z, 1
+        mesh.position.x, mesh.position.y, mesh.position.z, 1
     );
     auto R_X = glm::mat4(
-        cos(x_rotation), 0, sin(x_rotation), 0,
+        cos(mesh.x_rotation), 0, sin(mesh.x_rotation), 0,
         0, 1, 0, 0,
-        -sin(x_rotation), 0, cos(x_rotation), 0,
+        -sin(mesh.x_rotation), 0, cos(mesh.x_rotation), 0,
         0, 0, 0, 1
     );
     auto R_Y = glm::mat4(
         1, 0, 0, 0,
-        0, cos(y_rotation), sin(y_rotation), 0,
-        0, -sin(y_rotation), cos(y_rotation), 0,
+        0, cos(mesh.y_rotation), sin(mesh.y_rotation), 0,
+        0, -sin(mesh.y_rotation), cos(mesh.y_rotation), 0,
         0, 0, 0, 1
     );
     auto S = glm::mat4(
-        scale, 0, 0, 0,
-        0, scale, 0, 0,
-        0, 0, scale, 0,
+        mesh.scale, 0, 0, 0,
+        0, mesh.scale, 0, 0,
+        0, 0, mesh.scale, 0,
         0, 0, 0, 1
     );
-    return S * R_Y * R_X * T;
+
+    // Note that rotation doesn't affect translation direction
+
+    return S * T * R_Y * R_X;
 }
 
-std::string MeshViewer::vertex_shader() { return vs; }
-std::string MeshViewer::fragment_shader() { return fs; }
-std::vector<float> MeshViewer::vertices() { return verts; }
+std::string MeshViewer::get_vertex_shader(unsigned mesh_index) { return meshes.at(mesh_index).vs; }
+std::string MeshViewer::get_fragment_shader(unsigned mesh_index) { return meshes.at(mesh_index).fs; }
+std::vector<float> MeshViewer::get_vertices(unsigned mesh_index) { return meshes.at(mesh_index).verts; }
 
 std::string MeshViewer::load_shader(std::string filepath)
 {
