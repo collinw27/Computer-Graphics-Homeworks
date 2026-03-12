@@ -10,7 +10,7 @@ struct UpdateInfo
     float deltaTime;
     bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT;
     bool keyLEFT, keyRIGHT, keyUP, keyDOWN, keyE, keyR;
-    bool keyENTER;
+    bool keyENTER, keyZ;
 };
 
 struct Mesh
@@ -38,6 +38,10 @@ class MeshViewer
     unsigned mesh_count;
     std::vector<Mesh> meshes;
     int current_index = 0;
+    float elapsed = 0.f;
+
+    bool spinning = false;
+    glm::vec3 p1, p2;
 
 public:
 
@@ -65,6 +69,9 @@ void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::
 
 void MeshViewer::update(const UpdateInfo& info)
 {
+    if (spinning)
+        elapsed += info.deltaTime;
+
     // Transform mesh using inputs
 
     Mesh& current = meshes.at(current_index);
@@ -93,6 +100,8 @@ void MeshViewer::update(const UpdateInfo& info)
         current.scale = std::max(current.scale - info.deltaTime, 0.2f);
     if (info.keyR)
         current.scale += info.deltaTime;
+    if (info.keyZ)
+        spinning = !spinning;
     current.position = current.position + delta * info.deltaTime;
 
     // Switch between meshes
@@ -132,9 +141,19 @@ glm::mat4 MeshViewer::get_model_mat(unsigned mesh_index)
         0, 0, 0, 1
     );
 
-    // Note that rotation doesn't affect translation direction
+    // Spin around central axis if instructed to
 
-    return S * T * R_Y * R_X;
+    float angle = elapsed * 2;
+    auto M = glm::mat4(
+        cos(angle), 0, sin(angle), 0,
+        0, 1, 0, 0,
+        -sin(angle), 0, cos(angle), 0,
+        0, 0, 0, 1
+    );
+
+    // Note that mesh rotation doesn't affect translation direction
+
+    return M * S * T * R_Y * R_X;
 }
 
 std::string MeshViewer::get_vertex_shader(unsigned mesh_index) { return meshes.at(mesh_index).vs; }

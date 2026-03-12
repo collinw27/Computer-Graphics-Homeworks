@@ -157,6 +157,7 @@ int main()
         false, false, false, false, false
     };
     bool holdingENTER = false;
+    bool holdingZ = false;
 
     // uncomment this call to draw in wireframe polygons.
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -182,9 +183,11 @@ int main()
             keyStates[0], keyStates[1], keyStates[2], keyStates[3],
             keyStates[4], keyStates[5], keyStates[6], keyStates[7],
             keyStates[8], keyStates[9], keyStates[10], keyStates[11],
-            !holdingENTER && glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS
+            !holdingENTER && glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS,
+            !holdingZ && glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS
         };
         holdingENTER = glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS;
+        holdingZ = glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS;
         lastTime = currentTime;
 
         mesh_viewer.update(updateInfo);
