@@ -6,6 +6,10 @@
 #include <gtc/type_ptr.hpp>
 
 #include <iostream>
+#include <chrono>
+
+// #define TRANSFORM_VERTICES
+// #define PROFILE_RUNTIME
 
 // Some code adapted from https://learnopengl.com/Getting-started/Shaders
 
@@ -15,6 +19,10 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+// timing code (https://www.learncpp.com/cpp-tutorial/timing-your-code/)
+using Clock = std::chrono::steady_clock;
+using Second = std::chrono::duration<double, std::micro>;
 
 int main()
 {
@@ -129,7 +137,8 @@ int main()
         meshes[i] = GLMesh {
             VAO, VBO,
             shaderProgram,
-            numVertices
+            numVertices,
+            vertexVec
         };
     }
 
@@ -137,6 +146,7 @@ int main()
     // start tracking time
     float currentTime = glfwGetTime();
     float lastTime = currentTime;
+	std::chrono::time_point<Clock> codeTimer { Clock::now() };
 
     // start tracking keys
     int keys[12] = {GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D,
@@ -186,31 +196,57 @@ int main()
 
         // Render all meshes
 
-        for (int i = 0; i < MESH_COUNT; ++i)
+        codeTimer = Clock::now();
+        for (int mesh_idx = 0; mesh_idx < MESH_COUNT; ++mesh_idx)
         {
-            GLMesh glmesh = meshes[i];
+            GLMesh glmesh = meshes[mesh_idx];
 
             // draw our first triangle
-            glUseProgram(meshes[i].shaderProgram);
-            glBindVertexArray(meshes[i].VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-            glDrawArrays(GL_TRIANGLES, 0, meshes[i].vertexCount);
-            glBindVertexArray(0); // unbind our VA no need to unbind it every time
+            glUseProgram(glmesh.shaderProgram);
+            glBindVertexArray(glmesh.VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 
             // update model matrix
-            glm::mat4 model_mat = mesh_viewer.get_model_mat(i);
-            auto model_loc = glGetUniformLocation(meshes[i].shaderProgram, "model_mat");
+            // two ways of doing this: using a shader, and transforming the vertices directly
+
+            #ifndef TRANSFORM_VERTICES
+            glm::mat4 model_mat = mesh_viewer.get_model_mat(mesh_idx);
+            #else
+            glm::mat4 model_mat {1.f};
+            std::vector<float> vertexVec {glmesh.vertexVec};
+            for (int i = 0; i < vertexVec.size() / 3; ++i)
+            {
+                glm::vec4 vert = glm::vec4(vertexVec.at(3*i), vertexVec.at(3*i+1), vertexVec.at(3*i+2), 1.f);
+                vert = mesh_viewer.get_model_mat(mesh_idx) * vert;
+                vertexVec[3*i] = vert.x;
+                vertexVec[3*i+1] = vert.y;
+                vertexVec[3*i+2] = vert.z;
+            }
+            float* vertices = vertexVec.data();
+            glBindBuffer(GL_ARRAY_BUFFER, glmesh.VBO);
+            glBufferData(GL_ARRAY_BUFFER, vertexVec.size() * sizeof(float), vertices, GL_STATIC_DRAW);
+            #endif
+
+            auto model_loc = glGetUniformLocation(glmesh.shaderProgram, "model_mat");
             glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model_mat));
             glm::mat4 view_mat = glm::mat4(1.f);
             view_mat = glm::translate(view_mat, glm::vec3(0.f, 0.f, -3.f));
-            glUniformMatrix4fv(glGetUniformLocation(meshes[i].shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
+            glUniformMatrix4fv(glGetUniformLocation(glmesh.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
             glm::mat4 perspective_mat = glm::perspective(glm::radians(45.f), 800.f / 600.f, 0.1f, 100.f);
-            glUniformMatrix4fv(glGetUniformLocation(meshes[i].shaderProgram, "perspective"), 1, GL_FALSE, glm::value_ptr(perspective_mat));
+            glUniformMatrix4fv(glGetUniformLocation(glmesh.shaderProgram, "perspective"), 1, GL_FALSE, glm::value_ptr(perspective_mat));
+            
+            glDrawArrays(GL_TRIANGLES, 0, glmesh.vertexCount);
+            glBindVertexArray(0); // unbind our VA no need to unbind it every time
         }
  
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        #ifdef PROFILE_RUNTIME
+        int elapsed = std::chrono::duration_cast<Second>(Clock::now() - codeTimer).count();
+        std::cout << "Runtime: " << elapsed << " microseconds" << std::endl;
+        #endif
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:

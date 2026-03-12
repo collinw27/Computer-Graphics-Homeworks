@@ -30,6 +30,7 @@ struct GLMesh
     unsigned VAO, VBO;
     unsigned shaderProgram;
     unsigned vertexCount;
+    std::vector<float> vertexVec;
 };
 
 class MeshViewer
