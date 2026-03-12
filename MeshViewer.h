@@ -142,14 +142,40 @@ glm::mat4 MeshViewer::get_model_mat(unsigned mesh_index)
     );
 
     // Spin around central axis if instructed to
+    // See report for formulas
 
-    float angle = elapsed * 2;
-    auto M = glm::mat4(
-        cos(angle), 0, sin(angle), 0,
-        0, 1, 0, 0,
-        -sin(angle), 0, cos(angle), 0,
-        0, 0, 0, 1
-    );
+    glm::mat4 M;
+    {
+        glm::vec3 a = p2 - p1;
+        float phi = std::atan(std::sqrt(a.x*a.x + a.z*a.z)/a.y);
+        float theta = std::atan(a.z/a.x);
+        float angle = elapsed * 2;
+        auto R_phi = glm::mat4(
+            cos(phi), sin(phi), 0, 0,
+            -sin(phi), cos(phi), 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        );
+        auto R_theta = glm::mat4(
+            cos(theta), 0, sin(theta), 0,
+            0, 1, 0, 0,
+            -sin(theta), 0, cos(theta), 0,
+            0, 0, 0, 1
+        );
+        auto T = glm::mat4(
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            p1.x, p1.y, p1.z, 1
+        );
+        auto R = glm::mat4(
+            1, 0, 0, 0,
+            0, cos(angle), sin(angle), 0,
+            0, -sin(angle), cos(angle), 0,
+            0, 0, 0, 1
+        );
+        M = T * R_theta * R_phi * R * glm::inverse(R_phi) * glm::inverse(R_theta) * glm::inverse(T);
+    }
 
     // Note that mesh rotation doesn't affect translation direction
 
