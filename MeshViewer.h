@@ -60,7 +60,11 @@ private:
     std::vector<float> load_vertices(std::string filepath);
 };
 
-MeshViewer::MeshViewer() : meshes{} {}
+MeshViewer::MeshViewer() : meshes{}
+{
+    p1 = glm::vec3(1, 0, 0);
+    p2 = glm::vec3(-1, 0, 0);
+}
 
 void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos)
 {
@@ -144,11 +148,14 @@ glm::mat4 MeshViewer::get_model_mat(unsigned mesh_index)
     // Spin around central axis if instructed to
     // See report for formulas
 
-    glm::mat4 M;
+    glm::mat4 M{1.f};
     {
         glm::vec3 a = p2 - p1;
-        float phi = std::atan(std::sqrt(a.x*a.x + a.z*a.z)/a.y);
+        if (a.y == 0.f) a.y = 0.0001f;
+        if (a.x == 0.f) a.x = 0.0001f;
+        float phi = std::atan(std::sqrt(a.x*a.x + a.z*a.z)/a.y) - 1.5708;
         float theta = std::atan(a.z/a.x);
+        std::cout << phi << ", " << theta << std::endl;
         float angle = elapsed * 2;
         auto R_phi = glm::mat4(
             cos(phi), sin(phi), 0, 0,

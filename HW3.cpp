@@ -8,6 +8,7 @@
 #include <iostream>
 #include <chrono>
 
+// Use when profiling the runtime of manual view matrix computations
 // #define TRANSFORM_VERTICES
 // #define PROFILE_RUNTIME
 
@@ -59,7 +60,7 @@ int main()
     // Load multiple meshes
 
     constexpr int MESH_COUNT = 2;
-    GLMesh meshes[2];
+    GLMesh meshes[MESH_COUNT];
     for (int i = 0; i < MESH_COUNT; ++i)
     {
         // build and compile our shader program
@@ -247,7 +248,7 @@ int main()
         glfwPollEvents();
 
         #ifdef PROFILE_RUNTIME
-        int elapsed = std::chrono::duration_cast<Second>(Clock::now() - codeTimer).count();
+        int elapsed = (int)std::chrono::duration_cast<Second>(Clock::now() - codeTimer).count();
         std::cout << "Runtime: " << elapsed << " microseconds" << std::endl;
         #endif
     }
