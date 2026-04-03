@@ -1,0 +1,14 @@
+[
+{
+  "directory": "C:/Users/colli/Documents/School Stuff/CAP 4730/HW4/build",
+  "command": "C:\\PROGRA~1\\mingw64\\bin\\G__~1.EXE  @CMakeFiles/HW4.dir/includes_CXX.rsp -g -o CMakeFiles\\HW4.dir\\HW4.cpp.obj -c \"C:\\Users\\colli\\Documents\\School Stuff\\CAP 4730\\HW4\\HW4.cpp\"",
+  "file": "C:/Users/colli/Documents/School Stuff/CAP 4730/HW4/HW4.cpp",
+  "output": "CMakeFiles/HW4.dir/HW4.cpp.obj"
+},
+{
+  "directory": "C:/Users/colli/Documents/School Stuff/CAP 4730/HW4/build",
+  "command": "C:\\PROGRA~1\\mingw64\\bin\\G__~1.EXE  @CMakeFiles/HW4.dir/includes_CXX.rsp -g -o CMakeFiles\\HW4.dir\\MeshViewer.cpp.obj -c \"C:\\Users\\colli\\Documents\\School Stuff\\CAP 4730\\HW4\\MeshViewer.cpp\"",
+  "file": "C:/Users/colli/Documents/School Stuff/CAP 4730/HW4/MeshViewer.cpp",
+  "output": "CMakeFiles/HW4.dir/MeshViewer.cpp.obj"
+}
+]
