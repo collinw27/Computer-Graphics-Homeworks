@@ -87,9 +87,13 @@ void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::
     meshes.push_back(mesh);
 }
 
-void MeshViewer::set_light(glm::vec3 dir)
+void MeshViewer::set_light(glm::vec3 dir, float intensity, float kD, float kS, float N)
 {
     light_dir = dir;
+    light_intensity = intensity;
+    this->kD = kD;
+    this->kS = kS;
+    specN = N;
 }
 
 void MeshViewer::start_render_loop()
@@ -160,6 +164,16 @@ void MeshViewer::start_render_loop()
             glm::mat4 perspective_mat = glm::perspective(glm::radians(45.f), 800.f / 600.f, 0.1f, 100.f);
             glm::mat4 transform_mat = perspective_mat * view_mat * model_mat;
             glUniformMatrix4fv(glGetUniformLocation(mesh.shaderProgram, "transform"), 1, GL_FALSE, glm::value_ptr(transform_mat));
+
+            // Pass in lighting information
+
+            GLint light_mode = 0;
+            glUniform1i(glGetUniformLocation(mesh.shaderProgram, "lighting_mode"), light_mode);
+            glUniform3fv(glGetUniformLocation(mesh.shaderProgram, "light_dir"), 1, glm::value_ptr(light_dir));
+            glUniform1f(glGetUniformLocation(mesh.shaderProgram, "light_intensity"), light_intensity);
+            glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kD"), kD);
+            glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kS"), kS);
+            glUniform1f(glGetUniformLocation(mesh.shaderProgram, "N"), specN);
             
             glDrawArrays(GL_TRIANGLES, 0, mesh.vertexCount);
             glBindVertexArray(0);
@@ -357,15 +371,16 @@ std::vector<GLfloat> MeshViewer::load_vertices(std::string filepath)
         {
             for (int i = 1; i <= 3; i++)
             {
-                std::getline(std::stringstream{tokens.at(i)}, buffer2, '/');
+                std::stringstream tokenStream {tokens.at(i)};
+                std::getline(tokenStream, buffer2, '/');
                 int vert_index = std::stoi(buffer2);
                 for (int j = 0; j < 3; j++)
                     vertices.push_back(indexed_positions.at(vert_index - 1).at(j));
-                std::getline(std::stringstream{tokens.at(i)}, buffer2, '/');
+                std::getline(tokenStream, buffer2, '/');
                 vert_index = std::stoi(buffer2);
                 for (int j = 0; j < 2; j++)
                     vertices.push_back(indexed_uvs.at(vert_index - 1).at(j));
-                std::getline(std::stringstream{tokens.at(i)}, buffer2, '/');
+                std::getline(tokenStream, buffer2);
                 vert_index = std::stoi(buffer2);
                 for (int j = 0; j < 3; j++)
                     vertices.push_back(indexed_normals.at(vert_index - 1).at(j));

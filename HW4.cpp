@@ -21,8 +21,8 @@ int run()
     
     // Load scene objects
     
-    mesh_viewer.add_mesh("shader/monkey.vs", "shader/monkey.fs", "model/monkey.obj", glm::vec3(0, 0, 0));
-    mesh_viewer.set_light(glm::vec3(1, 1, 1));
+    mesh_viewer.add_mesh("shader/monkey.vs", "shader/monkey.fs", "model/monkey.obj", glm::vec3(0, 0, 1));
+    mesh_viewer.set_light(glm::vec3(-1, 0, 0.2), 5.f, 0.3f, 1.f, 1.f);
 
     // Configure other settings
 

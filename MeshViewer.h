@@ -36,6 +36,10 @@ class MeshViewer
     int current_index = 0;
 
     glm::vec3 light_dir {1, 0, 0};
+    float light_intensity = 1.f;
+    float kD = 1.f;
+    float kS = 1.f;
+    float specN = 1.f;
     int light_mode = 0;
 
 public:
@@ -45,7 +49,7 @@ public:
     void init();
 
     void add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos);
-    void set_light(glm::vec3 dir);
+    void set_light(glm::vec3 dir, float intensity, float kD, float kS, float N);
     void start_render_loop();
 
     void enable_wireframe();
