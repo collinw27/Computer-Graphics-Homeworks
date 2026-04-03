@@ -174,6 +174,7 @@ void MeshViewer::start_render_loop()
             glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kD"), kD);
             glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kS"), kS);
             glUniform1f(glGetUniformLocation(mesh.shaderProgram, "N"), specN);
+            glUniform3f(glGetUniformLocation(mesh.shaderProgram, "camera_dir"), 0, 0, 1);
             
             glDrawArrays(GL_TRIANGLES, 0, mesh.vertexCount);
             glBindVertexArray(0);
