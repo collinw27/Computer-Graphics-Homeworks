@@ -15,6 +15,13 @@
 
 struct UpdateInfo;
 
+enum class ShadingMode
+{
+    NONE = 0,
+    GOURAUD = 1,
+    PHONG = 2
+};
+
 struct Mesh
 {
     glm::vec3 position {};
@@ -43,9 +50,11 @@ class MeshViewer
     unsigned mesh_count;
     std::vector<Mesh> meshes;
     int current_index = 0;
+    ShadingMode shading_mode = ShadingMode::PHONG;
 
     glm::vec3 light_dir {1, 0, 0};
     float light_intensity = 1.f;
+    float kA = 0.2f;
     float kD = 1.f;
     float kS = 1.f;
     float specN = 1.f;
@@ -58,8 +67,9 @@ public:
     void init();
 
     void add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos);
-    void set_light(glm::vec3 dir, float intensity, float kD, float kS, float N);
+    void set_light(glm::vec3 dir, float intensity, float kA, float kD, float kS, float N);
     void set_camera(float distance, glm::vec2 rotation);
+    void set_shading(ShadingMode mode);
     void start_render_loop();
 
     void enable_wireframe();

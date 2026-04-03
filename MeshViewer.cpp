@@ -87,10 +87,11 @@ void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::
     meshes.push_back(mesh);
 }
 
-void MeshViewer::set_light(glm::vec3 dir, float intensity, float kD, float kS, float N)
+void MeshViewer::set_light(glm::vec3 dir, float intensity, float kA, float kD, float kS, float N)
 {
     light_dir = glm::normalize(dir);
     light_intensity = intensity;
+    this->kA = kA;
     this->kD = kD;
     this->kS = kS;
     specN = N;
@@ -101,6 +102,11 @@ void MeshViewer::set_camera(float distance, glm::vec2 rotation)
     camera.distance = distance;
     camera.x_rotation = rotation.x;
     camera.y_rotation = rotation.y;
+}
+
+void MeshViewer::set_shading(ShadingMode mode)
+{
+    shading_mode = mode;
 }
 
 void MeshViewer::start_render_loop()
@@ -175,9 +181,10 @@ void MeshViewer::start_render_loop()
             // Pass in lighting information
 
             GLint light_mode = 0;
-            glUniform1i(glGetUniformLocation(mesh.shaderProgram, "lighting_mode"), light_mode);
+            glUniform1i(glGetUniformLocation(mesh.shaderProgram, "shading_mode"), (int)shading_mode);
             glUniform3fv(glGetUniformLocation(mesh.shaderProgram, "light_dir"), 1, glm::value_ptr(light_dir));
             glUniform1f(glGetUniformLocation(mesh.shaderProgram, "light_intensity"), light_intensity);
+            glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kA"), kA);
             glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kD"), kD);
             glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kS"), kS);
             glUniform1f(glGetUniformLocation(mesh.shaderProgram, "N"), specN);
@@ -259,6 +266,23 @@ void MeshViewer::update(const UpdateInfo& info)
             std::cout << "Selected mesh #" << current_index << std::endl;
         else
             std::cout << "Selected camera" << std::endl;
+    }
+
+    // Switch between shading modes
+
+    if (info.keyZ)
+    {
+        switch (shading_mode)
+        {
+        case ShadingMode::GOURAUD:
+            std::cout << "Switched to Phong shading" << std::endl;
+            shading_mode = ShadingMode::PHONG;
+            break;
+        case ShadingMode::PHONG:
+            std::cout << "Switched to Gouraud shading" << std::endl;
+            shading_mode = ShadingMode::GOURAUD;
+            break;
+        }
     }
 }
 

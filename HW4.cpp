@@ -22,9 +22,10 @@ int run()
     // Load scene objects
     
     // mesh_viewer.add_mesh("shader/monkey.vs", "shader/monkey.fs", "model/monkey.obj", glm::vec3(0, 0, 1));
-    mesh_viewer.add_mesh("shader/monkey.vs", "shader/monkey.fs", "model/sphere.obj", glm::vec3(0, 0, 0));
-    mesh_viewer.set_light(glm::vec3(-1, 0, 1), 5.f, 0.3f, 0.3f, 20.f);
+    mesh_viewer.add_mesh("shader/color.vs", "shader/color.fs", "model/sphere.obj", glm::vec3(0, 0, 0));
+    mesh_viewer.set_light(glm::vec3(-1, 1.2, 1), 5.f, 0.1f, 0.3f, 0.3f, 20.f);
     mesh_viewer.set_camera(5, glm::vec2(0, 0));
+    mesh_viewer.set_shading(ShadingMode::PHONG);
 
     // Configure other settings
 
