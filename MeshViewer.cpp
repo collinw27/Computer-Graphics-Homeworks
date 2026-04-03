@@ -109,6 +109,11 @@ void MeshViewer::set_shading(ShadingMode mode)
     shading_mode = mode;
 }
 
+void MeshViewer::set_projection(glm::mat4 proj_mat)
+{
+    projection = proj_mat;
+}
+
 void MeshViewer::start_render_loop()
 {
     // Start tracking time
@@ -174,8 +179,7 @@ void MeshViewer::start_render_loop()
 
             glm::mat4 model_mat = get_model_mat(mesh);
             glm::mat4 view_mat = get_view_mat();
-            glm::mat4 perspective_mat = glm::perspective(glm::radians(45.f), 800.f / 600.f, 0.1f, 100.f);
-            glm::mat4 transform_mat = perspective_mat * view_mat * model_mat;
+            glm::mat4 transform_mat = projection * view_mat * model_mat;
             glUniformMatrix4fv(glGetUniformLocation(mesh.shaderProgram, "transform"), 1, GL_FALSE, glm::value_ptr(transform_mat));
 
             // Pass in lighting information

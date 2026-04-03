@@ -46,6 +46,7 @@ class MeshViewer
     GLFWwindow* window;
     
     Camera camera {};
+    glm::mat4 projection {1};
 
     unsigned mesh_count;
     std::vector<Mesh> meshes;
@@ -70,6 +71,7 @@ public:
     void set_light(glm::vec3 dir, float intensity, float kA, float kD, float kS, float N);
     void set_camera(float distance, glm::vec2 rotation);
     void set_shading(ShadingMode mode);
+    void set_projection(glm::mat4 projection);
     void start_render_loop();
 
     void enable_wireframe();
