@@ -89,11 +89,18 @@ void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::
 
 void MeshViewer::set_light(glm::vec3 dir, float intensity, float kD, float kS, float N)
 {
-    light_dir = dir;
+    light_dir = glm::normalize(dir);
     light_intensity = intensity;
     this->kD = kD;
     this->kS = kS;
     specN = N;
+}
+
+void MeshViewer::set_camera(float distance, glm::vec2 rotation)
+{
+    camera.distance = distance;
+    camera.x_rotation = rotation.x;
+    camera.y_rotation = rotation.y;
 }
 
 void MeshViewer::start_render_loop()
@@ -160,7 +167,7 @@ void MeshViewer::start_render_loop()
             // Update model matrix
 
             glm::mat4 model_mat = get_model_mat(mesh);
-            glm::mat4 view_mat = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -3.f));
+            glm::mat4 view_mat = get_view_mat();
             glm::mat4 perspective_mat = glm::perspective(glm::radians(45.f), 800.f / 600.f, 0.1f, 100.f);
             glm::mat4 transform_mat = perspective_mat * view_mat * model_mat;
             glUniformMatrix4fv(glGetUniformLocation(mesh.shaderProgram, "transform"), 1, GL_FALSE, glm::value_ptr(transform_mat));
@@ -174,7 +181,10 @@ void MeshViewer::start_render_loop()
             glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kD"), kD);
             glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kS"), kS);
             glUniform1f(glGetUniformLocation(mesh.shaderProgram, "N"), specN);
-            glUniform3f(glGetUniformLocation(mesh.shaderProgram, "camera_dir"), 0, 0, 1);
+            
+            glm::vec3 camera_dir(0, 0, 1);
+            camera_dir = get_view_rot_mat() * glm::vec4(camera_dir, 1.f);
+            glUniform3fv(glGetUniformLocation(mesh.shaderProgram, "camera_dir"), 1, glm::value_ptr(camera_dir));
             
             glDrawArrays(GL_TRIANGLES, 0, mesh.vertexCount);
             glBindVertexArray(0);
@@ -194,42 +204,61 @@ void MeshViewer::enable_wireframe()
 
 void MeshViewer::update(const UpdateInfo& info)
 {
-    // Transform mesh using inputs
-
-    Mesh& current = meshes.at(current_index);
-    glm::vec3 delta {};
+    glm::vec3 delta_pos {};
+    glm::vec2 delta_rot {};
+    float delta_scale = {};
     if (info.keyW)
-        delta = delta + glm::vec3(0.0, 0.0, -1.0);
+        delta_pos = delta_pos + glm::vec3(0.0, 0.0, -1.0);
     if (info.keyA)
-        delta = delta + glm::vec3(-1.0, 0.0, 0.0);
+        delta_pos = delta_pos + glm::vec3(-1.0, 0.0, 0.0);
     if (info.keyS)
-        delta = delta + glm::vec3(0.0, 0.0, 1.0);
+        delta_pos = delta_pos + glm::vec3(0.0, 0.0, 1.0);
     if (info.keyD)
-        delta = delta + glm::vec3(1.0, 0.0, 0.0);
+        delta_pos = delta_pos + glm::vec3(1.0, 0.0, 0.0);
     if (info.keySHIFT)
-        delta = delta + glm::vec3(0.0, -1.0, 0.0);
+        delta_pos = delta_pos + glm::vec3(0.0, -1.0, 0.0);
     if (info.keySPACE)
-        delta = delta + glm::vec3(0.0, 1.0, 0.0);
+        delta_pos = delta_pos + glm::vec3(0.0, 1.0, 0.0);
     if (info.keyLEFT)
-        current.x_rotation += info.deltaTime * 2;
+        delta_rot.x = 1;
     if (info.keyRIGHT)
-        current.x_rotation -= info.deltaTime * 2;
+        delta_rot.x = -1;
     if (info.keyUP)
-        current.y_rotation -= info.deltaTime * 2;
+        delta_rot.y = -1;
     if (info.keyDOWN)
-        current.y_rotation += info.deltaTime * 2;
+        delta_rot.y = 1;
     if (info.keyE)
-        current.scale = std::max(current.scale - info.deltaTime, 0.2f);
+        delta_scale = -1;
     if (info.keyR)
-        current.scale += info.deltaTime;
-    current.position = current.position + delta * info.deltaTime;
+        delta_scale = 1;
+        
+    // Transform mesh using inputs
+    // Applies to camera if index == 0
+
+    if (current_index == 0)
+    {
+        camera.distance = std::max(0.5f, camera.distance + delta_pos.z * 5 * info.deltaTime);
+        camera.x_rotation = camera.x_rotation - delta_rot.x * 2 * info.deltaTime;
+        camera.y_rotation = camera.y_rotation - delta_rot.y * 2 * info.deltaTime;
+    }
+    else
+    {
+        Mesh& current = meshes.at(current_index - 1);
+        current.position = current.position + delta_pos * info.deltaTime;
+        current.x_rotation = current.x_rotation + delta_rot.x * 2 * info.deltaTime;
+        current.y_rotation = current.y_rotation + delta_rot.y * 2 * info.deltaTime;
+        current.scale = std::max(current.scale + delta_scale * info.deltaTime, 0.2f);
+    }
 
     // Switch between meshes
 
     if (info.keyENTER)
     {
-        current_index = (current_index + 1) % meshes.size();
-        std::cout << "Selected mesh #" << current_index << std::endl;
+        current_index = (current_index + 1) % (meshes.size() + 1);
+        if (current_index != 0)
+            std::cout << "Selected mesh #" << current_index << std::endl;
+        else
+            std::cout << "Selected camera" << std::endl;
     }
 }
 
@@ -263,6 +292,34 @@ glm::mat4 MeshViewer::get_model_mat(const Mesh& mesh)
     // Note that mesh rotation doesn't affect translation direction
 
     return S * T * R_Y * R_X;
+}
+
+glm::mat4 MeshViewer::get_view_mat()
+{
+    auto T = glm::mat4(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, camera.distance, 1
+    );
+    return glm::inverse(get_view_rot_mat() * T);
+}
+
+glm::mat4 MeshViewer::get_view_rot_mat()
+{
+    auto R_X = glm::mat4(
+        cos(camera.x_rotation), 0, sin(camera.x_rotation), 0,
+        0, 1, 0, 0,
+        -sin(camera.x_rotation), 0, cos(camera.x_rotation), 0,
+        0, 0, 0, 1
+    );
+    auto R_Y = glm::mat4(
+        1, 0, 0, 0,
+        0, cos(camera.y_rotation), sin(camera.y_rotation), 0,
+        0, -sin(camera.y_rotation), cos(camera.y_rotation), 0,
+        0, 0, 0, 1
+    );
+    return R_X * R_Y;
 }
 
 std::string MeshViewer::load_shader(std::string filepath)

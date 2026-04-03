@@ -27,9 +27,18 @@ struct Mesh
     GLuint vertexCount = 0;
 };
 
+struct Camera
+{
+    float distance = 3.f;
+    float x_rotation = 0.f;
+    float y_rotation = 0.f;
+};
+
 class MeshViewer
 {
     GLFWwindow* window;
+    
+    Camera camera {};
 
     unsigned mesh_count;
     std::vector<Mesh> meshes;
@@ -50,6 +59,7 @@ public:
 
     void add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos);
     void set_light(glm::vec3 dir, float intensity, float kD, float kS, float N);
+    void set_camera(float distance, glm::vec2 rotation);
     void start_render_loop();
 
     void enable_wireframe();
@@ -62,6 +72,8 @@ private:
     GLuint link_shader(std::string vs_path, std::string fs_path);
     std::vector<GLfloat> load_vertices(std::string filepath);
     glm::mat4 get_model_mat(const Mesh& mesh);
+    glm::mat4 get_view_mat();
+    glm::mat4 get_view_rot_mat();
 };
 
 #endif

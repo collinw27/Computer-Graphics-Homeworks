@@ -18,5 +18,5 @@ out vec3 frag_normal;
 void main()
 {
     gl_Position = transform * vec4(pos.x, pos.y, pos.z, 1.0);
-    frag_normal = normalize((transform * vec4(normal, 1.0)).xyz);
+    frag_normal = normal;
 }

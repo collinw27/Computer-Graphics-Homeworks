@@ -14,10 +14,12 @@ out vec4 frag_color;
 
 void main()
 {
-    float diffuse = max(0, dot(frag_normal, light_dir)) * kD * light_intensity;
+    vec3 normal = normalize(frag_normal);
+    float diffuse = max(0, dot(normal, -light_dir)) * kD * light_intensity;
 
-    vec3 vR = 2 * dot(frag_normal, light_dir) * frag_normal - light_dir;
-    float specular = pow(max(0, dot(vR, camera_dir)) * kS * light_intensity, N);
+    vec3 vR = 2 * dot(normal, -light_dir) * normal + light_dir;
+    float specular = pow(max(0, dot(vR, camera_dir)), N) * kS * light_intensity;
+    specular = min(specular, diffuse);
 
     frag_color = vec4(0.5f, 0.5f, 1.f, 1.f);
     frag_color = vec4(mix(vec3(0, 0, 0), frag_color.rgb, min(1.f, diffuse)), 1.f);
