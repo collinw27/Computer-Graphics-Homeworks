@@ -22,6 +22,7 @@ int run()
     // Load mesh/meshes
     
     mesh_viewer.add_mesh("shader/monkey.vs", "shader/monkey.fs", "model/monkey.obj", glm::vec3(0, 0, 0));
+    mesh_viewer.add_mesh("shader/monkey.vs", "shader/monkey.fs", "model/cube.obj", glm::vec3(-1, 0, 0));
 
     // Configure other settings
 

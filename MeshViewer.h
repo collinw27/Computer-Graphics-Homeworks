@@ -42,10 +42,6 @@ class MeshViewer
     unsigned mesh_count;
     std::vector<Mesh> meshes;
     int current_index = 0;
-    float elapsed = 0.f;
-
-    bool spinning = false;
-    glm::vec3 p1, p2;
 
 public:
 

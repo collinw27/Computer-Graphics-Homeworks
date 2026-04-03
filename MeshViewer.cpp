@@ -7,8 +7,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 MeshViewer::MeshViewer() : meshes{}
 {
-    p1 = glm::vec3(1, 0, 0);
-    p2 = glm::vec3(-1, 0, 0);
 }
 
 void MeshViewer::init()
@@ -140,14 +138,10 @@ void MeshViewer::start_render_loop()
             // Update model matrix
 
             glm::mat4 model_mat = get_model_mat(mesh);
-
-            auto model_loc = glGetUniformLocation(mesh.shaderProgram, "model_mat");
-            glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model_mat));
-            glm::mat4 view_mat = glm::mat4(1.f);
-            view_mat = glm::translate(view_mat, glm::vec3(0.f, 0.f, -3.f));
-            glUniformMatrix4fv(glGetUniformLocation(mesh.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
+            glm::mat4 view_mat = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -3.f));
             glm::mat4 perspective_mat = glm::perspective(glm::radians(45.f), 800.f / 600.f, 0.1f, 100.f);
-            glUniformMatrix4fv(glGetUniformLocation(mesh.shaderProgram, "perspective"), 1, GL_FALSE, glm::value_ptr(perspective_mat));
+            glm::mat4 transform_mat = perspective_mat * view_mat * model_mat;
+            glUniformMatrix4fv(glGetUniformLocation(mesh.shaderProgram, "transform"), 1, GL_FALSE, glm::value_ptr(transform_mat));
             
             glDrawArrays(GL_TRIANGLES, 0, mesh.vertexCount);
             glBindVertexArray(0);
@@ -167,9 +161,6 @@ void MeshViewer::enable_wireframe()
 
 void MeshViewer::update(const UpdateInfo& info)
 {
-    if (spinning)
-        elapsed += info.deltaTime;
-
     // Transform mesh using inputs
 
     Mesh& current = meshes.at(current_index);
@@ -198,8 +189,6 @@ void MeshViewer::update(const UpdateInfo& info)
         current.scale = std::max(current.scale - info.deltaTime, 0.2f);
     if (info.keyR)
         current.scale += info.deltaTime;
-    if (info.keyZ)
-        spinning = !spinning;
     current.position = current.position + delta * info.deltaTime;
 
     // Switch between meshes
@@ -238,47 +227,9 @@ glm::mat4 MeshViewer::get_model_mat(const Mesh& mesh)
         0, 0, 0, 1
     );
 
-    // Spin around central axis if instructed to
-    // See report for formulas
-
-    glm::mat4 M{1.f};
-    {
-        glm::vec3 a = p2 - p1;
-        if (a.y == 0.f) a.y = 0.0001f;
-        if (a.x == 0.f) a.x = 0.0001f;
-        float phi = std::atan(std::sqrt(a.x*a.x + a.z*a.z)/a.y) - 1.5708;
-        float theta = std::atan(a.z/a.x);
-        float angle = elapsed * 2;
-        auto R_phi = glm::mat4(
-            cos(phi), sin(phi), 0, 0,
-            -sin(phi), cos(phi), 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1
-        );
-        auto R_theta = glm::mat4(
-            cos(theta), 0, sin(theta), 0,
-            0, 1, 0, 0,
-            -sin(theta), 0, cos(theta), 0,
-            0, 0, 0, 1
-        );
-        auto T = glm::mat4(
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            p1.x, p1.y, p1.z, 1
-        );
-        auto R = glm::mat4(
-            1, 0, 0, 0,
-            0, cos(angle), sin(angle), 0,
-            0, -sin(angle), cos(angle), 0,
-            0, 0, 0, 1
-        );
-        M = T * R_theta * R_phi * R * glm::inverse(R_phi) * glm::inverse(R_theta) * glm::inverse(T);
-    }
-
     // Note that mesh rotation doesn't affect translation direction
 
-    return M * S * T * R_Y * R_X;
+    return S * T * R_Y * R_X;
 }
 
 std::string MeshViewer::load_shader(std::string filepath)

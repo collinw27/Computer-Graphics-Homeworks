@@ -1,11 +1,9 @@
 #version 330 core
 
 layout (location = 0) in vec3 aPos;
-uniform mat4 model_mat;
-uniform mat4 view;
-uniform mat4 perspective;
+uniform mat4 transform;
 
 void main()
 {
-   gl_Position = perspective * view * model_mat * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+   gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
 }
