@@ -1,6 +1,9 @@
 #version 330 core
-out vec4 FragColor;
+
+in vec3 frag_normal;
+out vec4 frag_color;
+
 void main()
 {
-   FragColor = vec4(0.5, 0.5, 0.5, 1.0f);
+    frag_color = vec4(abs(frag_normal.x), abs(frag_normal.y), abs(frag_normal.z), 1.0f);
 }

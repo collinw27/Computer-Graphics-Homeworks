@@ -1,5 +1,13 @@
 #include "MeshViewer.h"
 
+struct UpdateInfo
+{
+    float deltaTime;
+    bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT;
+    bool keyLEFT, keyRIGHT, keyUP, keyDOWN, keyE, keyR;
+    bool keyENTER, keyZ;
+};
+
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
@@ -31,6 +39,8 @@ void MeshViewer::init()
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glewInit();
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos)
@@ -43,8 +53,8 @@ void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::
 
     mesh.shaderProgram = link_shader(vs, fs);
 
-    std::vector<float> vertexVec = load_vertices(obj);
-    unsigned int numVertices = vertexVec.size() * sizeof(float) / 3;
+    std::vector<GLfloat> vertexVec = load_vertices(obj);
+    unsigned int numVertices = vertexVec.size() * sizeof(float) / 8;
     
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
@@ -54,24 +64,32 @@ void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::
 
     float* vertices = vertexVec.data();
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertexVec.size() * sizeof(float), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexVec.size() * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
 
     // Finish setting mesh parameters
 
-    mesh.verts = vertexVec;
     mesh.position = start_pos;
     mesh.VAO = VAO;
     mesh.VBO = VBO;
     mesh.vertexCount = numVertices;
 
     meshes.push_back(mesh);
+}
+
+void MeshViewer::set_light(glm::vec3 dir)
+{
+    light_dir = dir;
 }
 
 void MeshViewer::start_render_loop()
@@ -126,7 +144,7 @@ void MeshViewer::start_render_loop()
         // Render
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Render all meshes
 
@@ -288,13 +306,15 @@ GLuint MeshViewer::link_shader(std::string vs_path, std::string fs_path)
     return shaderProgram;
 }
 
-std::vector<float> MeshViewer::load_vertices(std::string filepath)
+std::vector<GLfloat> MeshViewer::load_vertices(std::string filepath)
 {
     std::ifstream file{filepath};
     if (!file.is_open())
         throw std::runtime_error("Could not open file!");
     std::vector<float> vertices;
-    std::vector<std::vector<float>> indexed_vertices {};
+    std::vector<std::vector<float>> indexed_positions {};
+    std::vector<std::vector<float>> indexed_uvs {};
+    std::vector<std::vector<float>> indexed_normals {};
     std::string buffer;
     while (std::getline(file, buffer))
     {
@@ -303,13 +323,36 @@ std::vector<float> MeshViewer::load_vertices(std::string filepath)
         std::stringstream stream_buffer {buffer};
         while (std::getline(stream_buffer, buffer2, ' '))
             tokens.push_back(buffer2);
+
+        // Start by reading vertex data
+        // Stored in 3 separate tables:
+        // v = vertex pos, vt = UV pos, vn = vertex normal
+
         if (tokens.at(0) == "v")
         {
             std::vector<float> vert {};
             for (int i = 1; i <= 3; i++)
                 vert.push_back(std::stof(tokens.at(i)));
-            indexed_vertices.push_back(vert);
+            indexed_positions.push_back(vert);
         }
+        else if (tokens.at(0) == "vt")
+        {
+            std::vector<float> vert {};
+            for (int i = 1; i <= 2; i++)
+                vert.push_back(std::stof(tokens.at(i)));
+            indexed_uvs.push_back(vert);
+        }
+        else if (tokens.at(0) == "vn")
+        {
+            std::vector<float> vert {};
+            for (int i = 1; i <= 3; i++)
+                vert.push_back(std::stof(tokens.at(i)));
+            indexed_normals.push_back(vert);
+        }
+
+        // Each face combines data for these 3 components
+        // Assumed that all face data is after vertex data
+
         else if (tokens.at(0) == "f")
         {
             for (int i = 1; i <= 3; i++)
@@ -317,7 +360,15 @@ std::vector<float> MeshViewer::load_vertices(std::string filepath)
                 std::getline(std::stringstream{tokens.at(i)}, buffer2, '/');
                 int vert_index = std::stoi(buffer2);
                 for (int j = 0; j < 3; j++)
-                    vertices.push_back(indexed_vertices.at(vert_index - 1).at(j));
+                    vertices.push_back(indexed_positions.at(vert_index - 1).at(j));
+                std::getline(std::stringstream{tokens.at(i)}, buffer2, '/');
+                vert_index = std::stoi(buffer2);
+                for (int j = 0; j < 2; j++)
+                    vertices.push_back(indexed_uvs.at(vert_index - 1).at(j));
+                std::getline(std::stringstream{tokens.at(i)}, buffer2, '/');
+                vert_index = std::stoi(buffer2);
+                for (int j = 0; j < 3; j++)
+                    vertices.push_back(indexed_normals.at(vert_index - 1).at(j));
             }
         }
     }

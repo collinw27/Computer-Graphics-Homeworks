@@ -13,18 +13,10 @@
 #include <gtc/type_ptr.hpp>
 #include <glm.hpp>
 
-struct UpdateInfo
-{
-    float deltaTime;
-    bool keyW, keyA, keyS, keyD, keySPACE, keySHIFT;
-    bool keyLEFT, keyRIGHT, keyUP, keyDOWN, keyE, keyR;
-    bool keyENTER, keyZ;
-};
+struct UpdateInfo;
 
 struct Mesh
 {
-    std::vector<float> verts {};
-
     glm::vec3 position {};
     float x_rotation = 0.f;
     float y_rotation = 0.f;
@@ -43,6 +35,9 @@ class MeshViewer
     std::vector<Mesh> meshes;
     int current_index = 0;
 
+    glm::vec3 light_dir {1, 0, 0};
+    int light_mode = 0;
+
 public:
 
     MeshViewer();
@@ -50,6 +45,7 @@ public:
     void init();
 
     void add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos);
+    void set_light(glm::vec3 dir);
     void start_render_loop();
 
     void enable_wireframe();
@@ -60,8 +56,7 @@ private:
 
     std::string load_shader(std::string filepath);
     GLuint link_shader(std::string vs_path, std::string fs_path);
-    std::vector<float> load_vertices(std::string filepath);
-    
+    std::vector<GLfloat> load_vertices(std::string filepath);
     glm::mat4 get_model_mat(const Mesh& mesh);
 };
 

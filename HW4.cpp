@@ -19,14 +19,14 @@ int run()
 
     mesh_viewer.init();
     
-    // Load mesh/meshes
+    // Load scene objects
     
     mesh_viewer.add_mesh("shader/monkey.vs", "shader/monkey.fs", "model/monkey.obj", glm::vec3(0, 0, 0));
-    mesh_viewer.add_mesh("shader/monkey.vs", "shader/monkey.fs", "model/cube.obj", glm::vec3(-1, 0, 0));
+    mesh_viewer.set_light(glm::vec3(1, 1, 1));
 
     // Configure other settings
 
-    mesh_viewer.enable_wireframe();
+    // mesh_viewer.enable_wireframe();
 
     // Run program
 
