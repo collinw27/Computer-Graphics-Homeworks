@@ -31,10 +31,14 @@ void main()
 {
     // Gouraud: Calculate lighting in vertex
     // Pass diffuse + specular info to fragment shader
+    // Translation is subtracted from normal position
+    // (normals should be agnostic to translation, but should still
+    // be affected by the model's rotation)
 
+    vec3 translation = (model * vec4(0, 0, 0, 1)).xyz;
     if (shading_mode == 1)
     {
-        vec3 normal = normalize((model * vec4(in_normal, 1.0)).xyz);
+        vec3 normal = normalize((model * vec4(in_normal, 1.0)).xyz - translation);
         float diffuse = max(0, dot(normal, light_dir)) * kD * light_intensity + kA;
 
         vec3 vR = 2 * dot(normal, light_dir) * normal - light_dir;
@@ -51,5 +55,5 @@ void main()
     }
 
     gl_Position = transform * model * vec4(pos.x, pos.y, pos.z, 1.0);
-    frag_normal = (model * vec4(in_normal, 1.0)).xyz;
+    frag_normal = (model * vec4(in_normal, 1.0)).xyz - translation;
 }

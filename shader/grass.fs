@@ -21,7 +21,6 @@ out vec4 frag_color;
 void main()
 {
     frag_color = texture(tex, uv);
-    // frag_color = vec4(uv, 0, 1);
 
     if (shading_mode == 1 || shading_mode == 2)
     {

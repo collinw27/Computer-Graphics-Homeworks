@@ -8,5 +8,6 @@ void main()
 {
     float z = gl_FragCoord.z;
     float linear_z = -(near * far)/((z * far) - (near + far));
+    // float linear_z = near + far - (near * far)/z;
     frag_color = vec4(vec3(linear_z / far), 1.f);
 }
