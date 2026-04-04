@@ -43,7 +43,7 @@ void MeshViewer::init()
     glEnable(GL_DEPTH_TEST);
 }
 
-void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos)
+void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos, RenderMode render_mode)
 {
     // Start constructing mesh object
 
@@ -83,6 +83,7 @@ void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::
     mesh.VAO = VAO;
     mesh.VBO = VBO;
     mesh.vertexCount = numVertices;
+    mesh.render_mode = render_mode;
 
     meshes.push_back(mesh);
 }
@@ -112,6 +113,11 @@ void MeshViewer::set_shading(ShadingMode mode)
 void MeshViewer::set_projection(glm::mat4 proj_mat)
 {
     projection = proj_mat;
+}
+
+void MeshViewer::set_clear_color(glm::vec4 color)
+{
+    clear = color;
 }
 
 void MeshViewer::start_render_loop()
@@ -165,7 +171,7 @@ void MeshViewer::start_render_loop()
 
         // Render
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(clear.r, clear.g, clear.b, clear.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Render all meshes
@@ -184,18 +190,33 @@ void MeshViewer::start_render_loop()
 
             // Pass in lighting information
 
-            GLint light_mode = 0;
-            glUniform1i(glGetUniformLocation(mesh.shaderProgram, "shading_mode"), (int)shading_mode);
-            glUniform3fv(glGetUniformLocation(mesh.shaderProgram, "light_dir"), 1, glm::value_ptr(light_dir));
-            glUniform1f(glGetUniformLocation(mesh.shaderProgram, "light_intensity"), light_intensity);
-            glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kA"), kA);
-            glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kD"), kD);
-            glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kS"), kS);
-            glUniform1f(glGetUniformLocation(mesh.shaderProgram, "N"), specN);
-            
-            glm::vec3 camera_dir(0, 0, 1);
-            camera_dir = get_view_rot_mat() * glm::vec4(camera_dir, 1.f);
-            glUniform3fv(glGetUniformLocation(mesh.shaderProgram, "camera_dir"), 1, glm::value_ptr(camera_dir));
+            if (mesh.render_mode == RenderMode::SHADED)
+            {
+                GLint light_mode = 0;
+                glUniform1i(glGetUniformLocation(mesh.shaderProgram, "shading_mode"), (int)shading_mode);
+                glUniform3fv(glGetUniformLocation(mesh.shaderProgram, "light_dir"), 1, glm::value_ptr(light_dir));
+                glUniform1f(glGetUniformLocation(mesh.shaderProgram, "light_intensity"), light_intensity);
+                glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kA"), kA);
+                glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kD"), kD);
+                glUniform1f(glGetUniformLocation(mesh.shaderProgram, "kS"), kS);
+                glUniform1f(glGetUniformLocation(mesh.shaderProgram, "N"), specN);
+                
+                glm::vec3 camera_dir(0, 0, 1);
+                camera_dir = get_view_rot_mat() * glm::vec4(camera_dir, 1.f);
+                glUniform3fv(glGetUniformLocation(mesh.shaderProgram, "camera_dir"), 1, glm::value_ptr(camera_dir));
+            }
+            else if (mesh.render_mode == RenderMode::DEPTH)
+            {
+                // float n = 0.1f;
+                // float f = 100.f;
+                // glm::mat4 P {
+                //     n, 0, 0, 0,
+                //     0, n, 0, 0,
+                //     0, 0, n+f, 1,
+                //     0, 0, -f * n, 0
+                // };
+                // glUniformMatrix4fv(glGetUniformLocation(mesh.shaderProgram, "P_mat"), 1, GL_FALSE, glm::value_ptr(P));
+            }
             
             glDrawArrays(GL_TRIANGLES, 0, mesh.vertexCount);
             glBindVertexArray(0);
