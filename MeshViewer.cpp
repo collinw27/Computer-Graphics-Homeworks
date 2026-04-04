@@ -1,5 +1,8 @@
 #include "MeshViewer.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 struct UpdateInfo
 {
     float deltaTime;
@@ -41,6 +44,21 @@ void MeshViewer::init()
     glewInit();
 
     glEnable(GL_DEPTH_TEST);
+
+    // Grass texture is always loaded for simplicity
+    // Adapted from https://learnopengl.com/Getting-started/Textures
+    
+    stbi_set_flip_vertically_on_load(true);
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("model/grass.png", &width, &height, &nrChannels, 0);
+    if (!data)
+        throw std::runtime_error("Could not load texture");
+    glGenTextures(1, &grass_tex);
+    glBindTexture(GL_TEXTURE_2D, grass_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    stbi_image_free(data);
 }
 
 void MeshViewer::add_mesh(std::string vs, std::string fs, std::string obj, glm::vec3 start_pos, RenderMode render_mode)
@@ -185,12 +203,13 @@ void MeshViewer::start_render_loop()
 
             glm::mat4 model_mat = get_model_mat(mesh);
             glm::mat4 view_mat = get_view_mat();
-            glm::mat4 transform_mat = projection * view_mat * model_mat;
+            glm::mat4 transform_mat = projection * view_mat;
+            glUniformMatrix4fv(glGetUniformLocation(mesh.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model_mat));
             glUniformMatrix4fv(glGetUniformLocation(mesh.shaderProgram, "transform"), 1, GL_FALSE, glm::value_ptr(transform_mat));
 
             // Pass in lighting information
 
-            if (mesh.render_mode == RenderMode::SHADED)
+            if (mesh.render_mode == RenderMode::SHADED || mesh.render_mode == RenderMode::TEXTURE)
             {
                 GLint light_mode = 0;
                 glUniform1i(glGetUniformLocation(mesh.shaderProgram, "shading_mode"), (int)shading_mode);
@@ -205,17 +224,11 @@ void MeshViewer::start_render_loop()
                 camera_dir = get_view_rot_mat() * glm::vec4(camera_dir, 1.f);
                 glUniform3fv(glGetUniformLocation(mesh.shaderProgram, "camera_dir"), 1, glm::value_ptr(camera_dir));
             }
-            else if (mesh.render_mode == RenderMode::DEPTH)
+            if (mesh.render_mode == RenderMode::TEXTURE)
             {
-                // float n = 0.1f;
-                // float f = 100.f;
-                // glm::mat4 P {
-                //     n, 0, 0, 0,
-                //     0, n, 0, 0,
-                //     0, 0, n+f, 1,
-                //     0, 0, -f * n, 0
-                // };
-                // glUniformMatrix4fv(glGetUniformLocation(mesh.shaderProgram, "P_mat"), 1, GL_FALSE, glm::value_ptr(P));
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, grass_tex);
+                glUniform1i(glGetUniformLocation(mesh.shaderProgram, "tex"), 0);
             }
             
             glDrawArrays(GL_TRIANGLES, 0, mesh.vertexCount);

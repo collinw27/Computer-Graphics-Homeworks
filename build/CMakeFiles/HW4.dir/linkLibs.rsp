@@ -1,1 +1,1 @@
- "C:/Users/colli/Documents/School Stuff/CAP 4730/GLFW/lib/libglfw3.a" "C:/Users/colli/Documents/School Stuff/CAP 4730/GLEW/lib/glew32.lib" -lopengl32 -lgdi32 -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 
+ ../../GLFW/lib/libglfw3.a ../../GLEW/lib/glew32.lib -lopengl32 -lgdi32 -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

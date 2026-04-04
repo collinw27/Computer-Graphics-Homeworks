@@ -1,6 +1,6 @@
 CMakeFiles/HW4.dir/HW4.cpp.obj: \
  C:\Users\colli\Documents\School\ Stuff\CAP\ 4730\HW4\HW4.cpp \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLEW/include/GL/glew.h \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLEW/include/GL/glew.h \
  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/inttypes.h \
  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/crtdefs.h \
  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/corecrt.h \
@@ -15,7 +15,7 @@ CMakeFiles/HW4.dir/HW4.cpp.obj: \
  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/stddef.h \
  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/GL/glu.h \
  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/GL/gl.h \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLFW/include/GLFW/glfw3.h \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLFW/include/GLFW/glfw3.h \
  C:\Users\colli\Documents\School\ Stuff\CAP\ 4730\HW4\MeshViewer.h \
  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/iostream \
  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/bits/requires_hosted.h \
@@ -169,7 +169,7 @@ CMakeFiles/HW4.dir/HW4.cpp.obj: \
  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/tr1/poly_hermite.tcc \
  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/tr1/poly_laguerre.tcc \
  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/tr1/riemann_zeta.tcc \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/gtc/type_ptr.hpp \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.hpp \
  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/quaternion.hpp \
  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/constants.hpp \
  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/scalar_constants.hpp \
@@ -363,19 +363,16 @@ CMakeFiles/HW4.dir/HW4.cpp.obj: \
  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/cstring \
  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/string.h \
  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/sec_api/string_s.h \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/gtc/type_ptr.inl \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/glm.hpp \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/detail/_fixes.hpp \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/detail/setup.hpp \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.inl \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/glm.hpp \
  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/climits \
  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/cfloat \
  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/float.h \
  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/float.h \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/fwd.hpp \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/packing.hpp \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/detail/func_packing.inl \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/detail/type_half.hpp \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/detail/setup.hpp \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/detail/type_half.inl \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/integer.hpp \
- C:/Users/colli/DOCUME~1/SCHOOL~1/CAP473~1/GLM/detail/func_integer.inl
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/fwd.hpp \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/packing.hpp \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_packing.inl \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.hpp \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.inl \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/integer.hpp \
+ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_integer.inl

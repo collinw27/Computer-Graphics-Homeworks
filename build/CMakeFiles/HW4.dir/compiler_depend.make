@@ -192,18 +192,6 @@ CMakeFiles/HW4.dir/HW4.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CAP\ 4730
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/wctype.h \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLEW/include/GL/glew.h \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLFW/include/GLFW/glfw3.h \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/_fixes.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_integer.inl \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_packing.inl \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/setup.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.inl \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/fwd.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/glm.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.inl \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/integer.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/packing.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/common.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/_fixes.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/_vectorize.hpp \
@@ -213,12 +201,16 @@ CMakeFiles/HW4.dir/HW4.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CAP\ 4730
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_common.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_exponential.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_geometric.inl \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_integer.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_matrix.inl \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_packing.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_trigonometric.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_vector_relational.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/qualifier.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/setup.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_float.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_mat2x2.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_mat2x2.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_mat2x3.hpp \
@@ -350,7 +342,9 @@ CMakeFiles/HW4.dir/HW4.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CAP\ 4730
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint3_sized.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint4.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint4_sized.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/fwd.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/geometric.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/glm.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/constants.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/constants.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/epsilon.hpp \
@@ -359,7 +353,10 @@ CMakeFiles/HW4.dir/HW4.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CAP\ 4730
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/matrix_transform.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/quaternion.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/quaternion.inl \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/vec1.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/integer.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat2x2.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat2x3.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat2x4.hpp \
@@ -370,6 +367,7 @@ CMakeFiles/HW4.dir/HW4.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CAP\ 4730
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat4x3.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat4x4.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/matrix.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/packing.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/simd/platform.h \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/trigonometric.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/vec2.hpp \
@@ -485,6 +483,7 @@ CMakeFiles/HW4.dir/MeshViewer.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CA
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/iostream \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/istream \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/limits \
+  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/math.h \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/new \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/ostream \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/pstl/pstl_config.h \
@@ -525,12 +524,16 @@ CMakeFiles/HW4.dir/MeshViewer.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CA
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/x86_64-w64-mingw32/bits/gthr-default.h \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/x86_64-w64-mingw32/bits/gthr.h \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/x86_64-w64-mingw32/bits/os_defines.h \
+  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/emmintrin.h \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/float.h \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/limits.h \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/mm_malloc.h \
+  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/mmintrin.h \
+  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/stdarg.h \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/stddef.h \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/stdint.h \
   C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/syslimits.h \
+  C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/xmmintrin.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/GL/gl.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/GL/glu.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/_mingw.h \
@@ -538,6 +541,7 @@ CMakeFiles/HW4.dir/MeshViewer.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CA
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/_mingw_off_t.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/_mingw_secapi.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/_mingw_stat64.h \
+  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/_mingw_stdarg.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/assert.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/corecrt.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/corecrt_stdio_config.h \
@@ -557,6 +561,7 @@ CMakeFiles/HW4.dir/MeshViewer.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CA
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/sec_api/string_s.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/sec_api/sys/timeb_s.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/sec_api/wchar_s.h \
+  C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/stdarg.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/stddef.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/stdint.h \
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/stdio.h \
@@ -569,18 +574,6 @@ CMakeFiles/HW4.dir/MeshViewer.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CA
   C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/wctype.h \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLEW/include/GL/glew.h \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLFW/include/GLFW/glfw3.h \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/_fixes.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_integer.inl \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_packing.inl \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/setup.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.inl \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/fwd.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/glm.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.inl \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/integer.hpp \
-  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/packing.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/common.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/_fixes.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/_vectorize.hpp \
@@ -590,12 +583,16 @@ CMakeFiles/HW4.dir/MeshViewer.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CA
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_common.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_exponential.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_geometric.inl \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_integer.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_matrix.inl \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_packing.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_trigonometric.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_vector_relational.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/qualifier.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/setup.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_float.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_mat2x2.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_mat2x2.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_mat2x3.hpp \
@@ -727,7 +724,9 @@ CMakeFiles/HW4.dir/MeshViewer.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CA
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint3_sized.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint4.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint4_sized.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/fwd.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/geometric.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/glm.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/constants.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/constants.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/epsilon.hpp \
@@ -736,7 +735,10 @@ CMakeFiles/HW4.dir/MeshViewer.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CA
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/matrix_transform.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/quaternion.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/quaternion.inl \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.inl \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/vec1.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/integer.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat2x2.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat2x3.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat2x4.hpp \
@@ -747,12 +749,14 @@ CMakeFiles/HW4.dir/MeshViewer.cpp.obj: C:/Users/colli/Documents/School\ Stuff/CA
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat4x3.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat4x4.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/matrix.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/packing.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/simd/platform.h \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/trigonometric.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/vec2.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/vec3.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/vec4.hpp \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/vector_relational.hpp \
+  C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/STB/stb_image.h \
   C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/MeshViewer.h
 
 
@@ -793,6 +797,8 @@ C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/bits/era
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/quaternion.inl:
 
 C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/bits/codecvt.h:
+
+C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/_mingw_stdarg.h:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_vec3.hpp:
 
@@ -1116,9 +1122,9 @@ C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/tr1/lege
 
 C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/tr1/poly_hermite.tcc:
 
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint2.hpp:
-
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/glm.hpp:
+
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint2.hpp:
 
 C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/tr1/special_function_util.h:
 
@@ -1188,6 +1194,8 @@ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/matrix_double3x2_precis
 
 C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/GL/glu.h:
 
+C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/emmintrin.h:
+
 C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/_mingw.h:
 
 C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/_mingw_mac.h:
@@ -1196,11 +1204,15 @@ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/matrix_double4x2.hpp:
 
 C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/_mingw_stat64.h:
 
+C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/c++/math.h:
+
 C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/assert.h:
 
 C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/corecrt.h:
 
 C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/corecrt_stdio_config.h:
+
+C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/xmmintrin.h:
 
 C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/corecrt_wstdlib.h:
 
@@ -1268,24 +1280,6 @@ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/qualifier.hpp:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/_fixes.hpp:
 
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_integer.inl:
-
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_packing.inl:
-
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.hpp:
-
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.inl:
-
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/fwd.hpp:
-
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.hpp:
-
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint3_sized.hpp:
-
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.inl:
-
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/packing.hpp:
-
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/_vectorize.hpp:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/compute_common.hpp:
@@ -1296,13 +1290,21 @@ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_mat4x3.inl:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_exponential.inl:
 
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_integer.inl:
+
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_matrix.inl:
+
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_packing.inl:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat2x2.hpp:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/func_trigonometric.inl:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_float.hpp:
+
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.hpp:
+
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_half.inl:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/detail/type_mat2x2.inl:
 
@@ -1355,6 +1357,8 @@ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/matrix_double2x2.hpp:
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/epsilon.hpp:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/matrix_double2x3_precision.hpp:
+
+C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/mmintrin.h:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/matrix_double2x4.hpp:
 
@@ -1478,13 +1482,21 @@ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint1.hpp:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint2_sized.hpp:
 
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.inl:
+
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint3_sized.hpp:
+
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/ext/vector_uint4_sized.hpp:
+
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/fwd.hpp:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/geometric.hpp:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/epsilon.inl:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/quaternion.hpp:
+
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/gtc/type_ptr.hpp:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat2x3.hpp:
 
@@ -1498,6 +1510,8 @@ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat4x2.hpp:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/mat4x3.hpp:
 
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/packing.hpp:
+
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/simd/platform.h:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/vec3.hpp:
@@ -1505,3 +1519,9 @@ C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/vec3.hpp:
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/vec4.hpp:
 
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLM/vector_relational.hpp:
+
+C:/Program\ Files/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/stdarg.h:
+
+C:/Program\ Files/mingw64/x86_64-w64-mingw32/include/stdarg.h:
+
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/STB/stb_image.h:

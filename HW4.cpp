@@ -22,9 +22,9 @@ int run()
     // Load scene objects
     
     // mesh_viewer.add_mesh("shader/monkey.vs", "shader/monkey.fs", "model/monkey.obj", glm::vec3(0, 0, 1));
-    mesh_viewer.add_mesh("shader/color.vs", "shader/color.fs", "model/monkey_flat.obj", glm::vec3(0, 0, 0), RenderMode::SHADED);
+    mesh_viewer.add_mesh("shader/grass.vs", "shader/grass.fs", "model/cube.obj", glm::vec3(0, 0, 0), RenderMode::TEXTURE);
     mesh_viewer.set_light(glm::vec3(-1, 1.2, 1), 5.f, 0.1f, 0.3f, 0.3f, 20.f);
-    mesh_viewer.set_camera(2.f, glm::vec2(0, 0));
+    mesh_viewer.set_camera(4.f, glm::vec2(0, 0));
     mesh_viewer.set_shading(ShadingMode::PHONG);
     mesh_viewer.set_projection(glm::perspective(glm::radians(45.f), 800.f / 600.f, 0.1f, 100.f));
     // mesh_viewer.set_clear_color(glm::vec4(0, 0, 0, 1));

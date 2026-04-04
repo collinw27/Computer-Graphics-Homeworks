@@ -35,13 +35,13 @@
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 23,
+				"line" : 24,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 14,
+				"line" : 15,
 				"parent" : 0
 			}
 		]
@@ -59,15 +59,19 @@
 			[
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/colli/Documents/School Stuff/CAP 4730/GLFW/include"
+					"path" : "C:/Users/colli/Documents/School Stuff/CAP 4730/HW4/build/../../GLFW/include"
 				},
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/colli/Documents/School Stuff/CAP 4730/GLEW/include"
+					"path" : "C:/Users/colli/Documents/School Stuff/CAP 4730/HW4/build/../../GLEW/include"
 				},
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/colli/Documents/School Stuff/CAP 4730/GLM"
+					"path" : "C:/Users/colli/Documents/School Stuff/CAP 4730/HW4/build/../../GLM"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "C:/Users/colli/Documents/School Stuff/CAP 4730/HW4/build/../../STB"
 				}
 			],
 			"language" : "CXX",
@@ -93,12 +97,12 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "\"C:\\Users\\colli\\Documents\\School Stuff\\CAP 4730\\GLFW\\lib\\libglfw3.a\"",
+				"fragment" : "..\\..\\GLFW\\lib\\libglfw3.a",
 				"role" : "libraries"
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "\"C:\\Users\\colli\\Documents\\School Stuff\\CAP 4730\\GLEW\\lib\\glew32.lib\"",
+				"fragment" : "..\\..\\GLEW\\lib\\glew32.lib",
 				"role" : "libraries"
 			},
 			{

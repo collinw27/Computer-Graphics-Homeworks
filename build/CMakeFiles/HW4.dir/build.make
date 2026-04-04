@@ -109,8 +109,8 @@ HW4_EXTERNAL_OBJECTS =
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/HW4.exe: CMakeFiles/HW4.dir/HW4.cpp.obj
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/HW4.exe: CMakeFiles/HW4.dir/MeshViewer.cpp.obj
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/HW4.exe: CMakeFiles/HW4.dir/build.make
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/HW4.exe: C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLFW/lib/libglfw3.a
-C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/HW4.exe: C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/GLEW/lib/glew32.lib
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/HW4.exe: ../../GLFW/lib/libglfw3.a
+C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/HW4.exe: ../../GLEW/lib/glew32.lib
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/HW4.exe: CMakeFiles/HW4.dir/linkLibs.rsp
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/HW4.exe: CMakeFiles/HW4.dir/objects1.rsp
 C:/Users/colli/Documents/School\ Stuff/CAP\ 4730/HW4/HW4.exe: CMakeFiles/HW4.dir/link.txt

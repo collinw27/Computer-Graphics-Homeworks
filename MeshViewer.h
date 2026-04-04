@@ -28,7 +28,8 @@ enum class RenderMode
 {
     BASIC,
     SHADED,
-    DEPTH
+    DEPTH,
+    TEXTURE
 };
 
 struct Mesh
@@ -60,7 +61,7 @@ class MeshViewer
 
     unsigned mesh_count;
     std::vector<Mesh> meshes;
-    int current_index = 0;
+    int current_index = 1;
     ShadingMode shading_mode = ShadingMode::PHONG;
     glm::vec4 clear {0.2f, 0.3f, 0.3f, 1.0f};
 
@@ -71,6 +72,8 @@ class MeshViewer
     float kS = 1.f;
     float specN = 1.f;
     int light_mode = 0;
+
+    GLuint grass_tex;
 
 public:
 
